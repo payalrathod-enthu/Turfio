@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}Business details{% endblock %}
+{% block content %}
+  <h4 class="mb-3">{% if wizard %}Set up your turf{% else %}Settings — Business{% endif %}</h4>
+  {% include "setup/_steps.html" %}
+  <div class="tif-card p-3" style="max-width: 640px;">
+    <form method="post" enctype="multipart/form-data">
+      {% csrf_token %}
+      {% for e in form.non_field_errors %}<div class="alert alert-danger py-2 small">{{ e }}</div>{% endfor %}
+      {% for field in form %}
+        <div class="mb-3">
+          <label class="form-label small mb-1">{{ field.label }}</label>
+          {{ field }}
+          {% if field.help_text %}<div class="form-text">{{ field.help_text }}</div>{% endif %}
+          {% for e in field.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
+        </div>
+      {% endfor %}
+      <button class="btn btn-success">{% if wizard %}Save and continue{% else %}Save{% endif %}</button>
+    </form>
+  </div>
+{% endblock %}

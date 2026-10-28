@@ -1,0 +1,155 @@
+{% extends "base.html" %}
+{% load inr_filters %}
+{% block title %}{{ booking.booking_code }}{% endblock %}
+{% block content %}
+  {% if messages %}
+    {% for m in messages %}
+      <div class="alert alert-{{ m.tags }} py-2 small">{{ m }}</div>
+    {% endfor %}
+  {% endif %}
+
+  <div class="d-flex justify-content-between align-items-start mb-3">
+    <div>
+      <h4 class="mb-0">{{ booking.booking_code }}</h4>
+      <p class="text-muted mb-0">{{ booking.customer.name }} · {{ booking.customer.phone }}</p>
+    </div>
+    <div>
+      {% if booking.booking_status == 'cancelled' %}
+        <span class="badge badge-status-muted fs-6">CANCELLED</span>
+      {% elif booking.payment_status == 'paid' %}
+        <span class="badge badge-status-green fs-6">PAID</span>
+      {% elif booking.balance > 0 %}
+        <span class="badge badge-status-amber fs-6">{{ booking.get_payment_status_display|upper }}</span>
+      {% else %}
+        <span class="badge badge-status-red fs-6">{{ booking.get_payment_status_display|upper }}</span>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="row g-3">
+    <div class="col-12 col-lg-7">
+      <div class="tif-card p-3 mb-3">
+        <h6 class="mb-3">Details</h6>
+        <div class="row small">
+          <div class="col-6 mb-2"><span class="text-muted">Ground</span><br>{{ booking.ground.name }}</div>
+          <div class="col-6 mb-2"><span class="text-muted">Sport</span><br>{{ booking.sport.name|default:"—" }}</div>
+          <div class="col-6 mb-2"><span class="text-muted">Date</span><br>{{ booking.date|date:"D, d M Y" }}</div>
+          <div class="col-6 mb-2"><span class="text-muted">Time</span><br>{{ booking.start_time|time:"H:i" }} – {{ booking.end_time|time:"H:i" }}</div>
+          <div class="col-6 mb-2"><span class="text-muted">Duration</span><br>{{ booking.duration_minutes }} min</div>
+          <div class="col-6 mb-2"><span class="text-muted">Day Type</span><br>{{ booking.day_type|title }}</div>
+          <div class="col-6 mb-2"><span class="text-muted">Lights</span><br>{{ booking.lights|yesno:"Yes,No" }}</div>
+          <div class="col-6 mb-2"><span class="text-muted">Booking Type</span><br>{{ booking.get_booking_type_display }}</div>
+          <div class="col-6 mb-2"><span class="text-muted">Status</span><br>{{ booking.get_booking_status_display }}</div>
+          
+        </div>
+        {% if booking.notes %}
+         <hr><p class="small mb-0"><span class="text-muted">Notes:</span> {{ booking.notes }}</p>
+        {% endif %}
+        
+      <div class="tif-card p-3 mb-3">
+        <h6 class="mb-3">Payment History</h6>
+        {% if payments %}
+          <table class="table table-sm small mb-0">
+            <thead class="text-muted"><tr><th>Date</th><th>Mode</th><th>Type</th><th class="text-end">Amount</th></tr></thead>
+            <tbody>
+              {% for p in payments %}
+                <tr>
+                  <td>{{ p.created_at|date:"d M, H:i" }}</td>
+                  <td>{{ p.get_payment_mode_display }}</td>
+                  <td>{{ p.get_payment_type_display }}</td>
+                  <td class="text-end {% if p.payment_type == 'refund' %}text-danger{% endif %}">
+                    {% if p.payment_type == 'refund' %}-{% endif %}{{ p.amount|inr }}
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        {% else %}
+          <p class="text-muted small mb-0">No payments recorded.</p>
+        {% endif %}
+      </div>
+
+      {% if booking.booking_status == 'cancelled' %}
+        <div class="tif-card p-3 mb-3">
+          <h6 class="mb-3">Cancellation</h6>
+          <p class="small mb-1"><span class="text-muted">Reason:</span> {{ booking.cancellation_reason|default:"—" }}</p>
+          <p class="small mb-1"><span class="text-muted">Cancelled At:</span> {{ booking.cancelled_at|date:"d M Y, H:i" }}</p>
+          <p class="small mb-0"><span class="text-muted">Refund:</span> {{ booking.refund_amount|inr }} ({{ booking.refund_mode|default:"—" }})</p>
+        </div>
+      {% endif %}
+    </div>
+
+    <div class="col-12 col-lg-5">
+      {% if booking.booking_status == 'pending' %}
+        <div class="tif-card p-3 mb-3 border-warning">
+          <h6 class="mb-2">Pending request</h6>
+          <p class="small text-muted mb-2">This time is held until you confirm or cancel it.</p>
+          <form method="post" action="{% url 'booking_confirm' booking.id %}">
+            {% csrf_token %}
+            <button class="btn btn-success btn-sm w-100">Confirm booking</button>
+          </form>
+        </div>
+      {% endif %}
+      <div class="tif-card p-3 mb-3">
+        <h6 class="mb-3">Financial Summary</h6>
+        <div class="d-flex justify-content-between small mb-1"><span>Base Amount</span><span>{{ booking.base_amount|inr }}</span></div>
+        {% if booking.discount_amount %}<div class="d-flex justify-content-between small mb-1 text-danger"><span>Discount</span><span>-{{ booking.discount_amount|inr }}</span></div>{% endif %}
+        {% if booking.additional_charges_amount %}<div class="d-flex justify-content-between small mb-1"><span>Additional</span><span>+{{ booking.additional_charges_amount|inr }}</span></div>{% endif %}
+        <hr>
+        <div class="d-flex justify-content-between fw-bold mb-2"><span>Final Amount</span><span>{{ booking.final_amount|inr }}</span></div>
+        <div class="d-flex justify-content-between small mb-1"><span>Received</span><span>{{ booking.total_received|inr }}</span></div>
+        <div class="d-flex justify-content-between fw-semibold {% if booking.balance > 0 %}text-danger{% endif %}"><span>Balance</span><span>{{ booking.balance|inr }}</span></div>
+      </div>
+      {% if booking.booking_status != 'cancelled' and booking.balance > 0 %}
+        <div class="tif-card p-3 mb-3">
+        <h6 class="mb-3">Record Payment</h6>
+        <p class="text-muted small mb-2">Outstanding balance: {{ booking.balance|inr }}</p>
+        <form method="post" action="{% url 'record_payment' booking.id %}">
+          {% csrf_token %}
+        <div class="row g-2 mb-2">
+          <div class="col-6">
+            <label class="form-label small">Cash Amount</label>
+            <input type="number" step="0.01" name="cash_amount" class="form-control form-control-sm" value="0">
+          </div>
+          <div class="col-6">
+            <label class="form-label small">Online Amount</label>
+            <input type="number" step="0.01" name="online_amount" class="form-control form-control-sm" value="0">
+          </div>
+        </div>
+        <div class="mb-2">
+          <label class="form-label small">Notes (optional)</label>
+          <input type="text" name="notes" class="form-control form-control-sm">
+        </div>
+        <button type="submit" class="btn btn-success btn-sm w-100">Record Payment</button>
+      </form>
+    </div>
+  {% endif %}
+      {% if booking.booking_status != 'cancelled' %}
+        <div class="tif-card p-3">
+          <h6 class="mb-3 text-danger">Cancel Booking</h6>
+          <form method="post" action="{% url 'booking_cancel' booking.id %}" onsubmit="return confirm('Cancel this booking? This cannot be undone.');">
+            {% csrf_token %}
+            <div class="mb-2">
+              <label class="form-label small">Reason</label>
+              <input type="text" name="reason" class="form-control form-control-sm" required>
+            </div>
+            <div class="row g-2 mb-2">
+              <div class="col-6">
+                <label class="form-label small">Refund Amount</label>
+                <input type="number" step="0.01" name="refund_amount" class="form-control form-control-sm" value="0">
+              </div>
+              <div class="col-6">
+                <label class="form-label small">Refund Mode</label>
+                <select name="refund_mode" class="form-select form-select-sm">
+                  <option value="cash">Cash</option>
+                  <option value="online">Online</option>
+                </select>
+              </div>
+            </div>
+            <button type="submit" class="btn btn-outline-danger btn-sm w-100">Confirm Cancellation</button>
+          </form>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+{% endblock %}

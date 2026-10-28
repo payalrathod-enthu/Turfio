@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}Reports{% endblock %}
+{% block content %}
+  <h4 class="mb-3">Reports</h4>
+  <div class="row g-3">
+    <div class="col-md-4">
+      <div class="tif-card p-3 text-center">
+        <h6>Bookings</h6>
+        <a href="{% url 'export_bookings_csv' %}" class="btn btn-sm btn-outline-success">Export CSV</a>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="tif-card p-3 text-center">
+        <h6>Expenses</h6>
+        <a href="{% url 'export_expenses_csv' %}" class="btn btn-sm btn-outline-success">Export CSV</a>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="tif-card p-3 text-center">
+        <h6>Payments</h6>
+        <a href="{% url 'export_payments_csv' %}" class="btn btn-sm btn-outline-success">Export CSV</a>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="tif-card p-3 text-center">
+        <h6>Cancellations</h6>
+        <a href="{% url 'cancellations_report' %}" class="btn btn-sm btn-outline-secondary">View Report</a>
+      </div>
+    </div>
+  </div>
+{% endblock %}

@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% load inr_filters %}
+{% block title %}Bookings{% endblock %}
+{% block content %}
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="mb-0">Bookings</h4>
+    <a href="{% url 'booking_create' %}" class="btn btn-success btn-sm">
+      <i class="bi bi-plus-lg"></i> New Booking
+    </a>
+  </div>
+
+  <form method="get" class="tif-card p-3 mb-3 d-flex gap-2 flex-wrap">
+    <select name="status" class="form-select form-select-sm w-auto" onchange="this.form.submit()">
+      <option value="">All Statuses</option>
+      {% for value, label in status_choices %}
+        <option value="{{ value }}" {% if status_filter == value %}selected{% endif %}>{{ label }}</option>
+      {% endfor %}
+    </select>
+    <input type="date" name="date" value="{{ date_filter }}" class="form-control form-control-sm w-auto" onchange="this.form.submit()">
+    {% if status_filter or date_filter or pending or upcoming %}
+      <a href="{% url 'bookings' %}" class="btn btn-sm btn-outline-secondary">Clear</a>
+    {% endif %}
+  </form>
+  {% if pending %}<p class="small text-muted">Showing bookings with an outstanding balance.</p>{% endif %}
+  {% if upcoming %}<p class="small text-muted">Showing upcoming confirmed bookings.</p>{% endif %}
+
+  <div class="tif-card p-3">
+    {% if bookings %}
+      <div class="table-responsive">
+        <table class="table table-sm align-middle">
+          <thead class="text-muted small">
+            <tr><th>Code</th><th>Customer</th><th>Ground</th><th>Sport</th><th>Date</th><th>Time</th><th>Amount</th><th>Payment</th><th>Status</th></tr>
+          </thead>
+          <tbody>
+            {% for b in bookings %}
+              <tr style="cursor:pointer" onclick="window.location='{% url 'booking_detail' b.id %}'">
+                <td class="small fw-semibold">{{ b.booking_code }}</td>
+                <td>{{ b.customer.name }}</td>
+                <td>{{ b.ground.name }}</td>
+                <td class="small">{{ b.sport.name|default:"—" }}</td>
+                <td class="small">{{ b.date|date:"d M Y" }}</td>
+                <td class="small">{{ b.start_time|time:"H:i" }}–{{ b.end_time|time:"H:i" }}</td>
+                <td>{{ b.final_amount|inr }}</td>
+                <td>
+                  {% if b.payment_status == 'paid' %}<span class="badge badge-status-green">PAID</span>
+                  {% elif b.booking_status == 'cancelled' %}<span class="badge badge-status-muted">—</span>
+                  {% elif b.balance > 0 %}<span class="badge badge-status-amber">{{ b.get_payment_status_display|upper }}</span>
+                  {% else %}<span class="badge badge-status-red">{{ b.get_payment_status_display|upper }}</span>{% endif %}
+                </td>
+                <td>
+                  {% if b.booking_status == 'cancelled' %}<span class="badge badge-status-muted">CANCELLED</span>
+                  {% elif b.booking_status == 'confirmed' %}<span class="badge badge-status-green">CONFIRMED</span>
+                  {% elif b.booking_status == 'pending' %}<span class="badge badge-status-amber">PENDING</span>
+                  {% else %}<span class="badge badge-status-muted">{{ b.get_booking_status_display|upper }}</span>{% endif %}
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <p class="text-muted small mb-0">No bookings match these filters.</p>
+    {% endif %}
+  </div>
+{% endblock %}

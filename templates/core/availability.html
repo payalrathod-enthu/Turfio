@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}Availability{% endblock %}
+{% block content %}
+  <h4 class="mb-1">Availability</h4>
+  
+  <div class="tif-card p-3 mb-3">
+    <label class="form-label small mb-1">Select Date</label>
+    <input
+      type="date"
+      name="date"
+      value="{{ selected_date_str }}"
+      class="form-control"
+      style="max-width: 220px;"
+      hx-get="{% url 'availability' %}"
+      hx-target="#grounds-timeline"
+      hx-trigger="change"
+      hx-push-url="true">
+  </div>
+
+  <div id="grounds-timeline">
+    {% include "core/partials/availability_grounds.html" %}
+  </div>
+{% endblock %}

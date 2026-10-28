@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}Your layout{% endblock %}
+{% block content %}
+  <h4 class="mb-3">{% if wizard %}Set up your turf{% else %}Settings — Your layout{% endif %}</h4>
+  {% include "setup/_steps.html" %}
+
+  <h5 class="mt-2">How is your turf set up?</h5>
+  <p class="text-muted">Every turf is different. Tell us how yours is arranged so we can show customers the correct booking options.</p>
+
+  {% if has_existing %}
+    <div class="alert alert-warning small">
+      You already have grounds set up. Choosing a layout <strong>does not delete or change</strong> anything:
+      your grounds and bookings stay exactly as they are. You can add more in the next step and switch off the ones you no longer use.
+    </div>
+  {% endif %}
+
+  <div class="row g-3">
+    <div class="col-12 col-lg-4">
+      <form method="post" class="h-100">{% csrf_token %}<input type="hidden" name="layout" value="whole">
+        <div class="lay-card {% if current == 'whole' %}selected{% endif %}">
+          <h6>One full ground</h6>
+          <div class="dg"><div>ONE FULL GROUND</div></div>
+          <p class="small mb-1">I have one ground. Customers book the entire ground at a time.</p>
+          <p class="small text-muted">Example: one football turf. Two customers can't book it at overlapping times.</p>
+          <button class="btn btn-success w-100 push">{% if current == 'whole' %}Keep this setup{% else %}Choose this setup{% endif %}</button>
+        </div>
+      </form>
+    </div>
+    <div class="col-12 col-lg-4">
+      <form method="post" class="h-100">{% csrf_token %}<input type="hidden" name="layout" value="separate">
+        <div class="lay-card {% if current == 'separate' %}selected{% endif %}">
+          <h6>Several separate grounds or courts</h6>
+          <div class="dg"><div>Ground 1</div><div>Ground 2</div><div>Ground 3</div></div>
+          <p class="small mb-1">I have multiple separate grounds or courts. Customers can book each one independently.</p>
+          <p class="small text-muted">Example: three cricket nets. Booking Net 1 does not block Net 2.</p>
+          <button class="btn btn-success w-100 push">{% if current == 'separate' %}Keep this setup{% else %}Choose this setup{% endif %}</button>
+        </div>
+      </form>
+    </div>
+    <div class="col-12 col-lg-4">
+      <form method="post" class="h-100">{% csrf_token %}<input type="hidden" name="layout" value="sections">
+        <div class="lay-card {% if current == 'sections' %}selected{% endif %}">
+          <h6>One large ground divided into sections</h6>
+          <div class="dg tight"><div>Section 1</div><div>Section 2</div><div>Section 3</div></div>
+          <p class="small mb-1">I have one large ground divided into parts. Customers can book certain combinations of those parts.</p>
+          <p class="small text-muted">Example: one big field that can be one small pitch, two together, or the whole field.</p>
+          <button class="btn btn-success w-100 push">{% if current == 'sections' %}Keep this setup{% else %}Choose this setup{% endif %}</button>
+        </div>
+      </form>
+    </div>
+  </div>
+{% endblock %}

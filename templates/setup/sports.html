@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% block title %}Sports{% endblock %}
+{% block content %}
+  <h4 class="mb-3">Settings — Sports</h4>
+  {% if messages %}{% for m in messages %}<div class="alert alert-{{ m.tags }} py-2 small">{{ m }}</div>{% endfor %}{% endif %}
+  <p class="text-muted small">Tell us which sports you offer. Customers and staff pick a sport when they book. Switching a sport off hides it from new bookings but keeps it on old ones.</p>
+
+  <div class="row g-3">
+    <div class="col-12 col-lg-5">
+      <div class="tif-card p-3">
+        <h6 class="mb-3">Your sports</h6>
+        <table class="table table-sm align-middle mb-3"><tbody>
+          {% for s in sports %}
+            <tr class="{% if not s.is_active %}text-muted{% endif %}">
+              <td>
+                <form method="post" action="{% url 'sports_action' %}" class="d-flex gap-1">{% csrf_token %}
+                  <input type="hidden" name="action" value="rename"><input type="hidden" name="sport_id" value="{{ s.id }}">
+                  <input name="name" value="{{ s.name }}" class="form-control form-control-sm" maxlength="100">
+                  <button class="btn btn-sm btn-outline-secondary">Rename</button>
+                </form>
+                <div class="small text-muted">{{ s.booking_count }} booking{{ s.booking_count|pluralize }}</div>
+              </td>
+              <td class="text-end small text-nowrap">
+                <form method="post" action="{% url 'sports_action' %}" class="d-inline">{% csrf_token %}
+                  <input type="hidden" name="action" value="toggle"><input type="hidden" name="sport_id" value="{{ s.id }}">
+                  <button class="btn btn-link btn-sm p-0">{% if s.is_active %}Switch off{% else %}Switch on{% endif %}</button>
+                </form>
+              </td>
+            </tr>
+          {% empty %}<tr><td class="text-muted small">No sports yet. Add your first one below, for example Football or Cricket.</td></tr>{% endfor %}
+        </tbody></table>
+        <form method="post" action="{% url 'sports_action' %}" class="d-flex gap-2">{% csrf_token %}
+          <input type="hidden" name="action" value="add">
+          <input name="name" class="form-control form-control-sm" placeholder="e.g. Football" maxlength="100" required>
+          <button class="btn btn-success btn-sm">Add</button>
+        </form>
+      </div>
+    </div>
+
+    <div class="col-12 col-lg-7">
+      <div class="tif-card p-3">
+        <h6 class="mb-1">Which sports can each ground option be used for?</h6>
+        <p class="small text-muted">Tick the sports allowed on each option. If you tick none, that option allows every sport.</p>
+        {% if stranded %}
+          <div class="alert alert-warning py-2 small">These options only allow sports that are switched off, so nobody can book them: {{ stranded|join:", " }}.</div>
+        {% endif %}
+        {% if active_sports and matrix %}
+          <form method="post" action="{% url 'sports_action' %}">{% csrf_token %}
+            <input type="hidden" name="action" value="save_matrix">
+            <div class="table-responsive">
+              <table class="table table-sm align-middle">
+                <thead class="text-muted small"><tr><th>Ground option</th>{% for s in active_sports %}<th class="text-center">{{ s.name }}</th>{% endfor %}</tr></thead>
+                <tbody>
+                  {% for row in matrix %}
+                    <tr>
+                      <td class="small">{{ row.config.name }}{% if not row.config.is_active %} <span class="text-muted">(off)</span>{% endif %}</td>
+                      {% for s in active_sports %}
+                        <td class="text-center"><input class="form-check-input" type="checkbox" name="cfg_{{ row.config.id }}" value="{{ s.id }}" {% if s.id in row.ticked %}checked{% endif %}></td>
+                      {% endfor %}
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+            <button class="btn btn-success btn-sm">Save</button>
+          </form>
+        {% else %}
+          <p class="small text-muted mb-0">Add a sport and some ground options first.</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+{% endblock %}

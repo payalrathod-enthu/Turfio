@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+{% load inr_filters %}
+{% block title %}Calendar{% endblock %}
+{% block content %}
+  <h4 class="mb-3">Calendar</h4>
+  {% if messages %}{% for m in messages %}<div class="alert alert-{{ m.tags }} py-2 small">{{ m }}</div>{% endfor %}{% endif %}
+
+  <div class="row g-3">
+    <div class="col-12 col-xl-5">
+      <div class="tif-card p-3">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <a class="btn btn-sm btn-outline-secondary" href="?date={{ prev_month|date:'Y-m-d' }}">&laquo;</a>
+          <strong>{{ first_of_month|date:"F Y" }}</strong>
+          <a class="btn btn-sm btn-outline-secondary" href="?date={{ next_month|date:'Y-m-d' }}">&raquo;</a>
+        </div>
+        <table class="table table-borderless text-center mb-0">
+          <thead class="text-muted small"><tr><th>Mon</th><th>Tue</th><th>Wed</th><th>Thu</th><th>Fri</th><th>Sat</th><th>Sun</th></tr></thead>
+          <tbody>
+            {% for week in weeks %}
+              <tr>
+                {% for cell in week %}
+                  <td class="p-1">
+                    <a href="?date={{ cell.date|date:'Y-m-d' }}"
+                       class="cal-day {% if not cell.in_month %}muted{% endif %} {% if cell.is_today %}today{% endif %} {% if cell.is_selected %}selected{% endif %}">
+                      {{ cell.date.day }}
+                      {% if cell.in_month and cell.count %}<small>{{ cell.count }} booked</small>{% endif %}
+                      {% if cell.has_tournament %}<small><i class="bi bi-trophy"></i></small>{% endif %}
+                    </a>
+                  </td>
+                {% endfor %}
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="col-12 col-xl-7">
+      <div class="d-flex justify-content-between align-items-center mb-2">
+        <h5 class="mb-0">{{ selected_date|date:"l, d F Y" }}</h5>
+        <a class="btn btn-success btn-sm" href="{% url 'booking_create' %}?date={{ selected_date|date:'Y-m-d' }}"><i class="bi bi-plus-lg"></i> New Booking</a>
+      </div>
+      <p class="small text-muted mb-2">
+        <span class="badge bg-success bg-opacity-25 text-success">Available</span>
+        <span class="badge bg-danger bg-opacity-50 text-dark">Booked</span>
+        <span class="badge bg-primary bg-opacity-75">Tournament</span>
+      </p>
+
+      {% for row in section_rows %}
+        <div class="tif-card p-3 mb-3">
+          <h6 class="mb-2">{{ row.ground.name }}</h6>
+          <div class="d-flex rounded overflow-hidden mb-2" style="height:26px; border:1px solid #e2e8f0;">
+            {% for seg in row.segments %}
+              <div style="width:{{ seg.width_pct }}%;"
+                   class="{% if seg.status == 'available' %}bg-success bg-opacity-25{% elif seg.tournament or seg.booking.booking_type == 'tournament' %}bg-primary bg-opacity-75{% else %}bg-danger bg-opacity-50{% endif %}"
+                   title="{{ seg.start_str }}-{{ seg.end_str }}"></div>
+            {% endfor %}
+          </div>
+          {% if not row.segments %}<p class="small text-muted mb-0">Closed on this day.</p>{% endif %}
+          <div class="d-flex flex-wrap gap-2">
+            {% for seg in row.segments %}
+              {% if seg.status == 'available' %}
+                <a class="badge badge-status-green text-decoration-none px-2 py-2"
+                   href="{% url 'booking_create' %}?resource={{ row.ground.id }}&date={{ seg.date_str }}&start_time={{ seg.start_str }}
+                  <i class="bi bi-plus-circle"></i> {{ seg.start_str }}–{{ seg.end_str }}</a>
+              {% elif seg.tournament %}
+                <a class="badge bg-primary text-decoration-none px-2 py-2" href="{% url 'tournament_detail' seg.tournament.id %}">
+                  <i class="bi bi-trophy"></i> {{ seg.start_str }}–{{ seg.end_str }} · {{ seg.tournament.name }}</a>
+              {% else %}
+                <a class="badge badge-status-red text-decoration-none px-2 py-2" href="{% url 'booking_detail' seg.booking.id %}">
+                  {{ seg.start_str }}–{{ seg.end_str }} · {{ seg.booking.config.name }} · {{ seg.booking.customer.name }}</a>
+              {% endif %}
+            {% endfor %}
+          </div>
+        </div>
+      {% empty %}
+        <div class="tif-card p-3 text-muted small">No grounds are set up yet.</div>
+      {% endfor %}
+
+      <div class="tif-card p-3">
+        <h6 class="mb-2">All bookings this day</h6>
+        <table class="table table-sm mb-0">
+          <tbody>
+            {% for b in day_bookings %}
+              <tr style="cursor:pointer" onclick="window.location='{% url 'booking_detail' b.id %}'"
+                  class="{% if b.booking_status == 'cancelled' %}text-muted text-decoration-line-through{% endif %}">
+                <td class="small">{{ b.start_time|time:"H:i" }}–{{ b.end_time|time:"H:i" }}</td>
+                <td class="small">{{ b.config.name }}</td>
+                <td>{{ b.customer.name }}</td>
+                <td class="small">{{ b.get_booking_type_display }}{% if b.booking_status == 'pending' %} · pending{% endif %}</td>
+                <td class="text-end">{{ b.final_amount|inr }}</td>
+              </tr>
+            {% empty %}
+              <tr><td class="text-muted small">No bookings on this day.</td></tr>
+            {% endfor %}
+            {% for t in day_tournaments %}
+              <tr style="cursor:pointer" onclick="window.location='{% url 'tournament_detail' t.id %}'">
+                <td class="small">{{ t.start_time|time:"H:i" }}–{{ t.end_time|time:"H:i" }}</td>
+                <td class="small" colspan="2"><i class="bi bi-trophy"></i> {{ t.name }}</td>
+                <td class="small">Tournament</td>
+                <td class="text-end">{{ t.final_amount|inr }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+{% endblock %}

@@ -1,0 +1,38 @@
+{% load inr_filters %}
+<p class="text-muted small mb-3">Open: {{ hours_label }}</p>
+{% for entry in ground_data %}
+  <div class="tif-card p-3 mb-3">
+    <div class="d-flex justify-content-between align-items-center mb-2">
+      <h6 class="mb-0">{{ entry.ground.name }}</h6>
+    </div>
+
+    <div class="d-flex rounded overflow-hidden mb-2" style="height: 28px; border: 1px solid #e2e8f0;">
+      {% for seg in entry.segments %}
+        <div class="{% if seg.status == 'available' %}bg-success bg-opacity-25{% elif seg.tournament %}bg-primary bg-opacity-75{% else %}bg-danger bg-opacity-50{% endif %}"
+             style="width: {{ seg.width_pct }}%;" title="{{ seg.start_str }} - {{ seg.end_str }}"></div>
+      {% endfor %}
+    </div>
+    {% if not entry.segments %}<p class="small text-muted mb-0">Closed on this day.</p>{% endif %}
+
+    <div class="d-flex flex-wrap gap-2">
+      {% for seg in entry.segments %}
+        {% if seg.status == 'available' %}
+          <a href="{% url 'booking_create' %}?resource={{ entry.ground.id }}&date={{ seg.date_str }}&start_time={{ seg.start_str }}&end_time={{ seg.end_str }}"
+             class="badge badge-status-green text-decoration-none px-2 py-2">
+            <i class="bi bi-plus-circle"></i> {{ seg.start_str }}–{{ seg.end_str }} Available
+          </a>
+        {% elif seg.tournament %}
+          <a href="{% url 'tournament_detail' seg.tournament.id %}" class="badge bg-primary text-decoration-none px-2 py-2">
+            <i class="bi bi-trophy"></i> {{ seg.start_str }}–{{ seg.end_str }} · {{ seg.tournament.name }}
+          </a>
+        {% else %}
+          <a href="{% url 'booking_detail' seg.booking.id %}" class="badge badge-status-red text-decoration-none px-2 py-2">
+            {{ seg.start_str }}–{{ seg.end_str }} · {{ seg.booking.customer.name }}{% if seg.booking.booking_status == 'pending' %} (pending){% endif %}
+          </a>
+        {% endif %}
+      {% endfor %}
+    </div>
+  </div>
+{% empty %}
+  <div class="tif-card p-3 text-muted small">No grounds are set up yet.</div>
+{% endfor %}

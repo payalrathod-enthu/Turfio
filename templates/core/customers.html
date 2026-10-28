@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% load inr_filters %}
+{% block title %}Customers{% endblock %}
+{% block content %}
+  <h4 class="mb-3">Customers</h4>
+  <form method="get" class="tif-card p-3 mb-3">
+    <input type="text" name="q" value="{{ search }}" placeholder="Search name, phone, team..." class="form-control form-control-sm">
+  </form>
+  <div class="tif-card p-3">
+    <table class="table table-sm">
+      <thead class="text-muted small"><tr><th>Name</th><th>Phone</th><th>Team</th><th>Bookings</th><th>Total Spent</th><th>Last Booking</th></tr></thead>
+      <tbody>
+        {% for row in customer_list %}
+          <tr style="cursor:pointer" onclick="window.location='{% url 'customer_detail' row.customer.id %}'">
+            <td>{{ row.customer.name }}</td>
+            <td class="small">{{ row.customer.phone }}</td>
+            <td class="small">{{ row.customer.team_name|default:"—" }}</td>
+            <td>{{ row.total_bookings }}</td>
+            <td>{{ row.total_spent|inr }}</td>
+            <td class="small">{% if row.last_booking %}{{ row.last_booking.date|date:"d M Y" }}{% else %}—{% endif %}</td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="6" class="text-muted small">No customers found.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% endblock %}

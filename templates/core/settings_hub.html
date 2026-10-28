@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block title %}Settings{% endblock %}
+{% block content %}
+  <h4 class="mb-3">Settings</h4>
+  <div class="row g-3">
+    <div class="col-md-4"><a class="text-decoration-none text-reset" href="{% url 'setup_profile' %}"><div class="tif-card p-3 kpi-link h-100"><h6>Business details</h6><div class="small text-muted">Name, address, contact, logo, booking page address.</div></div></a></div>
+    <div class="col-md-4"><a class="text-decoration-none text-reset" href="{% url 'setup_hours' %}"><div class="tif-card p-3 kpi-link h-100"><h6>Hours & rules</h6><div class="small text-muted">Opening hours, lights, booking rules.</div></div></a></div>
+    <div class="col-md-4"><a class="text-decoration-none text-reset" href="{% url 'setup_grounds' %}"><div class="tif-card p-3 kpi-link h-100"><h6>Grounds</h6><div class="small text-muted">Your grounds and what customers can book.</div></div></a></div>
+    <div class="col-md-4"><a class="text-decoration-none text-reset" href="{% url 'setup_pricing' %}"><div class="tif-card p-3 kpi-link h-100"><h6>Prices</h6><div class="small text-muted">Hourly prices for each ground type.</div></div></a></div>
+    <div class="col-md-4"><a class="text-decoration-none text-reset" href="{% url 'settings_pricing' %}"><div class="tif-card p-3 kpi-link h-100"><h6>Advanced price rules</h6><div class="small text-muted">Switch individual price rules on or off.</div></div></a></div>
+    <div class="col-md-4"><a class="text-decoration-none text-reset" href="{% url 'setup_review' %}"><div class="tif-card p-3 kpi-link h-100"><h6>Setup summary</h6><div class="small text-muted">Everything at a glance.</div></div></a></div>
+  </div>
+{% endblock %}

@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% load form_filters %}
+{% block title %}Change layout{% endblock %}
+{% block content %}
+  <h4 class="mb-3">Change your layout?</h4>
+  {% include "setup/_steps.html" %}
+  <div class="tif-card p-3" style="max-width: 640px;">
+    <p>You're switching from <strong>{{ labels|get_item:current }}</strong> to <strong>{{ labels|get_item:choice }}</strong>.</p>
+    <ul class="small">
+      <li>Your existing grounds, sections and options are <strong>kept exactly as they are</strong>.</li>
+      <li>{{ booking_count }} booking{{ booking_count|pluralize }} stay{{ booking_count|pluralize:"s," }} untouched.</li>
+      <li>This only changes the questions we ask when you add new grounds. To stop using a ground, switch it off in <em>What customers can book</em>.</li>
+    </ul>
+    <form method="post">{% csrf_token %}
+      <input type="hidden" name="layout" value="{{ choice }}"><input type="hidden" name="confirm" value="1">
+      <button class="btn btn-success">Yes, switch</button>
+      <a class="btn btn-link" href="{% url 'setup_layout' %}">Keep my current layout</a>
+    </form>
+  </div>
+{% endblock %}

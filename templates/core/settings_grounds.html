@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}Grounds Settings{% endblock %}
+{% block content %}
+  <h4 class="mb-3">Settings — Grounds</h4>
+  <div class="tif-card p-3">
+    <p class="text-muted small">Manage grounds (add/edit/reorder) via <a href="/admin/core/ground/">Django Admin</a> for now — a dedicated UI comes in a later pass.</p>
+    <table class="table table-sm">
+      <thead class="text-muted small"><tr><th>Name</th><th>Type</th><th>Order</th><th>Status</th></tr></thead>
+      <tbody>
+        {% for g in grounds %}
+          <tr>
+            <td>{{ g.name }}</td><td>{{ g.type }}</td><td>{{ g.display_order }}</td>
+            <td>{% if g.is_active %}<span class="badge badge-status-green">Active</span>{% else %}<span class="badge badge-status-muted">Inactive</span>{% endif %}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% endblock %}

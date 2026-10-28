@@ -1,0 +1,8 @@
+Hi,
+
+Use this link to choose a new Turfio password:
+{{ protocol }}://{{ domain }}{% url 'password_reset_confirm' uidb64=uid token=token %}
+
+If you didn't ask for this, you can ignore this email.
+
+— Turfio

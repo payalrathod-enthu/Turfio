@@ -1,0 +1,10 @@
+{% extends "auth_base.html" %}
+{% block title %}Check your email{% endblock %}
+{% block content %}
+  <div class="text-center">
+    <i class="bi bi-envelope-check text-success" style="font-size:2.5rem"></i>
+    <h5 class="mt-2">Check your email</h5>
+    <p class="small text-muted">We sent a confirmation link{% if email %} to <strong>{{ email }}</strong>{% endif %}. Click it to activate your account.</p>
+    <a href="{% url 'resend_verification' %}" class="small">Didn't get it? Resend</a>
+  </div>
+{% endblock %}

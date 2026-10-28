@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% block title %}Team{% endblock %}
+{% block content %}
+  <h4 class="mb-3">Team</h4>
+  {% if messages %}{% for m in messages %}<div class="alert alert-{{ m.tags }} py-2 small">{{ m }}</div>{% endfor %}{% endif %}
+  <div class="row g-3">
+    <div class="col-12 col-lg-4">
+      <div class="tif-card p-3">
+        <h6 class="mb-3">Add a team member</h6>
+        <form method="post">
+          {% csrf_token %}
+          {% for field in form %}
+            <div class="mb-2">
+              <label class="form-label small mb-1">{{ field.label }}</label>{{ field }}
+              {% for e in field.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
+            </div>
+          {% endfor %}
+          <button class="btn btn-success btn-sm w-100">Send invitation</button>
+        </form>
+        <p class="small text-muted mt-2 mb-0">
+          Manager: everything except team. Booking staff: bookings, calendar, customers.
+          Finance staff: payments, expenses, reports.
+        </p>
+      </div>
+    </div>
+    <div class="col-12 col-lg-8">
+      <div class="tif-card p-3">
+        <table class="table table-sm align-middle mb-0">
+          <thead class="text-muted small"><tr><th>Name</th><th>Email</th><th>Role</th><th>Status</th><th></th></tr></thead>
+          <tbody>
+            {% for m in members %}
+              <tr>
+                <td>{{ m.user.first_name|default:m.user.username }}</td>
+                <td class="small">{{ m.user.email }}</td>
+                <td class="small">
+                  {% if m.role == 'owner' %}Owner{% else %}
+                    <form method="post" action="{% url 'team_update' m.id %}" class="d-flex gap-1">
+                      {% csrf_token %}<input type="hidden" name="action" value="role">
+                      <select name="role" class="form-select form-select-sm" onchange="this.form.submit()">
+                        {% for value, label in assignable_roles %}<option value="{{ value }}" {% if m.role == value %}selected{% endif %}>{{ label }}</option>{% endfor %}
+                      </select>
+                    </form>
+                  {% endif %}
+                </td>
+                <td>
+                  {% if not m.is_active %}<span class="badge badge-status-muted">Removed</span>
+                  {% elif not m.user.is_active %}<span class="badge badge-status-amber">Invite pending</span>
+                  {% else %}<span class="badge badge-status-green">Active</span>{% endif %}
+                </td>
+                <td class="small text-end">
+                  {% if m.role != 'owner' %}
+                    {% if m.is_active and not m.user.is_active %}
+                      <form method="post" action="{% url 'team_resend' m.id %}" class="d-inline">{% csrf_token %}<button class="btn btn-link btn-sm p-0">Resend</button></form> ·
+                    {% endif %}
+                    <form method="post" action="{% url 'team_update' m.id %}" class="d-inline"
+                          onsubmit="return confirm('Change this person\'s access?');">
+                      {% csrf_token %}
+                      {% if m.is_active %}<input type="hidden" name="action" value="deactivate"><button class="btn btn-link btn-sm text-danger p-0">Remove</button>
+                      {% else %}<input type="hidden" name="action" value="activate"><button class="btn btn-link btn-sm p-0">Restore</button>{% endif %}
+                    </form>
+                  {% endif %}
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+{% endblock %}

@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% load inr_filters %}
+{% block title %}{{ tournament.tournament_code }}{% endblock %}
+{% block content %}
+  <h4 class="mb-0">{{ tournament.tournament_code }} — {{ tournament.name }}</h4>
+  <p class="text-muted mb-3">{{ tournament.organizer }} · {{ tournament.contact }}</p>
+  <div class="row g-3">
+    <div class="col-12 col-lg-7">
+      <div class="tif-card p-3 mb-3">
+        <p class="small mb-1"><span class="text-muted">Date:</span> {{ tournament.date|date:"D, d M Y" }}</p>
+        <p class="small mb-1"><span class="text-muted">Time:</span> {{ tournament.start_time|time:"H:i" }} – {{ tournament.end_time|time:"H:i" }}</p>
+        <p class="small mb-0"><span class="text-muted">Grounds:</span>
+          {% for tg in grounds %}{{ tg.ground.name }}{% if not forloop.last %}, {% endif %}{% endfor %}
+        </p>
+      </div>
+    </div>
+    <div class="col-12 col-lg-5">
+      <div class="tif-card p-3">
+        <div class="d-flex justify-content-between small mb-1"><span>Base Charges</span><span>{{ tournament.base_ground_charges|inr }}</span></div>
+        <div class="d-flex justify-content-between small mb-1"><span>Premises</span><span>{{ tournament.premises_charges|inr }}</span></div>
+        <div class="d-flex justify-content-between small mb-1"><span>Additional</span><span>{{ tournament.additional_charges|inr }}</span></div>
+        <div class="d-flex justify-content-between small mb-1 text-danger"><span>Discount</span><span>-{{ tournament.discount|inr }}</span></div>
+        <hr>
+        <div class="d-flex justify-content-between fw-bold mb-2"><span>Final Amount</span><span>{{ tournament.final_amount|inr }}</span></div>
+        <div class="d-flex justify-content-between small mb-1"><span>Received</span><span>{{ tournament.amount_received|inr }}</span></div>
+        <div class="d-flex justify-content-between fw-semibold {% if tournament.balance > 0 %}text-danger{% endif %}"><span>Balance</span><span>{{ tournament.balance|inr }}</span></div>
+      </div>
+    </div>
+  </div>
+{% endblock %}

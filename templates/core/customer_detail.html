@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% load inr_filters %}
+{% block title %}{{ customer.name }}{% endblock %}
+{% block content %}
+  <h4 class="mb-0">{{ customer.name }}</h4>
+  <p class="text-muted mb-3">{{ customer.phone }} {% if customer.team_name %}· {{ customer.team_name }}{% endif %}</p>
+  <div class="tif-card p-3">
+    <h6 class="mb-3">Booking History</h6>
+    <table class="table table-sm">
+      <thead class="text-muted small"><tr><th>Code</th><th>Ground</th><th>Date</th><th>Amount</th><th>Status</th></tr></thead>
+      <tbody>
+        {% for b in bookings %}
+          <tr style="cursor:pointer" onclick="window.location='{% url 'booking_detail' b.id %}'">
+            <td class="small fw-semibold">{{ b.booking_code }}</td>
+            <td>{{ b.ground.name }}</td>
+            <td class="small">{{ b.date|date:"d M Y" }}</td>
+            <td>{{ b.final_amount|inr }}</td>
+            <td>{{ b.get_booking_status_display }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% endblock %}

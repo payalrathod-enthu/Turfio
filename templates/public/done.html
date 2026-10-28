@@ -1,0 +1,14 @@
+{% extends "public/base_public.html" %}
+{% load inr_filters %}
+{% block title %}Request received{% endblock %}
+{% block content %}
+  <div class="tif-card p-4 text-center">
+    <i class="bi bi-check-circle text-success" style="font-size:2.5rem"></i>
+    <h4 class="mt-2">Request received</h4>
+    <p class="mb-1">Reference: <strong>{{ booking.booking_code }}</strong></p>
+    <p class="small text-muted mb-1">{{ booking.config.bookable_type.name }} · {{ booking.date|date:"l, d F Y" }} · {{ booking.start_time|time:"g:i A" }} – {{ booking.end_time|time:"g:i A" }}</p>
+    <p class="small text-muted">Estimated {{ booking.final_amount|inr }}</p>
+    <p class="small">Your time is held. {{ biz.name }} will confirm shortly{% if biz.contact_phone %}, or call {{ biz.contact_phone }}{% endif %}.</p>
+    <a href="{% url 'public_home' biz.slug %}" class="btn btn-outline-success btn-sm">Check another time</a>
+  </div>
+{% endblock %}

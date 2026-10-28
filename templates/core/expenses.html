@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% load inr_filters %}
+{% block title %}Expenses{% endblock %}
+{% block content %}
+  <h4 class="mb-3">Expenses</h4>
+  {% if messages %}{% for m in messages %}<div class="alert alert-{{ m.tags }} py-2 small">{{ m }}</div>{% endfor %}{% endif %}
+
+  <div class="row g-3">
+    <div class="col-12 col-lg-5">
+      <div class="tif-card p-3">
+        <h6 class="mb-3">Add Expense</h6>
+        <form method="post" enctype="multipart/form-data">
+          {% csrf_token %}
+          <datalist id="category-list">{% for c in categories %}<option value="{{ c }}">{% endfor %}</datalist>
+          {% for field in form %}
+            <div class="mb-2">
+              <label class="form-label small">{{ field.label }}</label>
+              {{ field }}
+              {% for e in field.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
+            </div>
+          {% endfor %}
+          <button class="btn btn-success btn-sm w-100">Save Expense</button>
+        </form>
+      </div>
+    </div>
+
+    <div class="col-12 col-lg-7">
+      <div class="tif-card p-3">
+        <table class="table table-sm align-middle">
+          <thead class="text-muted small">
+            <tr><th>Date</th><th>Category</th><th>Vendor</th><th>Amount</th><th>Status</th><th></th></tr>
+          </thead>
+          <tbody>
+            {% for e in expenses %}
+              <tr>
+                <td class="small">{{ e.date|date:"d M Y" }}</td>
+                <td class="small">{{ e.category }}</td>
+                <td class="small">{{ e.vendor|default:"—" }}</td>
+                <td>{{ e.amount|inr }}</td>
+                <td>
+                  {% if e.status == 'paid' %}<span class="badge badge-status-green">PAID</span>
+                  {% elif e.status == 'pending' %}<span class="badge badge-status-red">PENDING</span>
+                  {% else %}<span class="badge badge-status-amber">PARTIAL</span>{% endif %}
+                </td>
+                <td class="small text-end">
+                  <a href="{% url 'expense_edit' e.id %}">Edit</a> ·
+                  <form method="post" action="{% url 'expense_delete' e.id %}" class="d-inline"
+                        onsubmit="return confirm('Delete this expense?');">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-link btn-sm text-danger p-0 align-baseline">Delete</button>
+                  </form>
+                </td>
+              </tr>
+            {% empty %}
+              <tr><td colspan="6" class="text-muted small">No expenses recorded.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+{% endblock %}
