@@ -49,6 +49,8 @@ class TurfBusiness(models.Model):
     timezone = models.CharField(max_length=64, default='Asia/Kolkata')
     logo = models.ImageField(upload_to='tenants/logos/', blank=True)
     cover_image = models.ImageField(upload_to='tenants/covers/', blank=True)
+    description = models.TextField(blank=True, default='')
+    is_listed = models.BooleanField(default=False)          # show on the Turfio marketplace
     currency = models.CharField(max_length=3, default='INR')
     status = models.CharField(max_length=12, choices=STATUS_CHOICES, default='onboarding')
     layout_type = models.CharField(max_length=10, blank=True, default='',
@@ -326,7 +328,9 @@ class Booking(models.Model):
     customer = models.ForeignKey(Customer, on_delete=models.PROTECT, related_name='bookings')
     config = models.ForeignKey(BookableConfig, on_delete=models.PROTECT, related_name='bookings')
     sport = models.ForeignKey(Sport, on_delete=models.PROTECT, null=True, blank=True, related_name='bookings')
-
+    source = models.CharField(max_length=10, default='staff',
+                              choices=[('staff', 'Added by staff'), ('online', 'Booked online')])
+    owner_seen = models.BooleanField(default=True)           # False until staff open a new online booking
     date = models.DateField(db_index=True)
     start_time = models.TimeField()
     end_time = models.TimeField()

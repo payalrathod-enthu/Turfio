@@ -1,37 +1,62 @@
-
 import os
 from pathlib import Path
+import dj_database_url
 from dotenv import load_dotenv
-
 # Load .env for local development.
 # On Render, environment variables are configured in the dashboard.
-load_dotenv()
+load_dotenv(override=False)   # CHANGED: was load_dotenv(). override=True makes your .env beat stray Windows variables.
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
 # Security settings
+DEBUG = os.environ.get("DEBUG", "False").lower() == "true"
+
 SECRET_KEY = os.environ.get("SECRET_KEY")
 
 if not SECRET_KEY:
-    if os.environ.get("RENDER"):
-        raise RuntimeError(
-            "SECRET_KEY must be configured in Render environment variables."
-        )
-    SECRET_KEY = "django-insecure-local-development-only-change-this-key"
+    raise RuntimeError(
+        "SECRET_KEY is missing. Add it to your .env file locally "
+        "or configure it in your hosting environment."
+    )
+# Trust HTTPS forwarded by Vercel
+SECURE_PROXY_SSL_HEADER = (
+    "HTTP_X_FORWARDED_PROTO",
+    "https",
+)
 
-DEBUG = os.environ.get("DEBUG", "False").lower() == "true"
+# Production HTTPS security
+SECURE_SSL_REDIRECT = not DEBUG
+
+# Secure cookies
+SESSION_COOKIE_SECURE = not DEBUG
+CSRF_COOKIE_SECURE = not DEBUG
+
+# HSTS: start cautiously
+SECURE_HSTS_SECONDS = 0
 
 ALLOWED_HOSTS = [
-    "turfio-34nu.onrender.com",
     "localhost",
     "127.0.0.1",
+    "turfio-34nu.onrender.com",
 ]
 
 CSRF_TRUSTED_ORIGINS = [
     "https://turfio-34nu.onrender.com",
 ]
 
+vercel_url = os.environ.get("VERCEL_URL")
+
+if vercel_url:
+    ALLOWED_HOSTS.append(vercel_url)
+    CSRF_TRUSTED_ORIGINS.append(
+        f"https://{vercel_url}"
+    )
+
+SECURE_PROXY_SSL_HEADER = (
+    "HTTP_X_FORWARDED_PROTO",
+    "https"
+)
 
 # Application definition
 INSTALLED_APPS = [
@@ -91,17 +116,15 @@ TEMPLATES = [
 
 # Database: PostgreSQL
 DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.postgresql",
-        "NAME": os.environ.get("DATABASE_NAME"),
-        "USER": os.environ.get("DATABASE_USER"),
-        "PASSWORD": os.environ.get("DATABASE_PASSWORD"),
-        "HOST": os.environ.get("DATABASE_HOST"),
-        "PORT": os.environ.get("DATABASE_PORT", "5432"),
-        "CONN_MAX_AGE": 60,
-    }
+    "default": dj_database_url.config(
+        env="DATABASE_URL",
+        conn_max_age=0,
+        conn_health_checks=True,
+        ssl_require=True,
+    )
 }
 
+DATABASES["default"]["DISABLE_SERVER_SIDE_CURSORS"] = True
 
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [
@@ -156,7 +179,14 @@ MEDIA_ROOT = BASE_DIR / "media"
 # Configure SMTP environment variables before enabling email delivery.
 MAILERS = {
     "default": {
-        "BACKEND": "django.core.mail.backends.console.EmailBackend",
+        "BACKEND": "django.core.mail.backends.smtp.EmailBackend",
+        "OPTIONS": {
+            "host": os.environ.get("EMAIL_HOST", ""),
+            "port": int(os.environ.get("EMAIL_PORT", "587")),
+            "username": os.environ.get("EMAIL_HOST_USER", ""),
+            "password": os.environ.get("EMAIL_HOST_PASSWORD", ""),
+            "use_tls": True,
+        },
     },
 }
 

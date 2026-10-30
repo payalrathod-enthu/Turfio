@@ -3,7 +3,7 @@ from django.shortcuts import redirect
 from .models import Membership
 from .tenancy import tenant_context
 
-SETUP_ALLOWED = ('/setup/', '/logout/', '/static/', '/media/', '/admin/', '/t/')
+SETUP_ALLOWED = ('/setup/', '/logout/', '/static/', '/media/', '/admin/', '/t/', '/turfs/')
 
 
 class TenantMiddleware:

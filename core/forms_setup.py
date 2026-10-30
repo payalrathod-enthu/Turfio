@@ -38,17 +38,18 @@ def _style(form):
 class ProfileForm(forms.ModelForm):
     class Meta:
         model = TurfBusiness
-        fields = ['name', 'slug', 'contact_email', 'contact_phone', 'address',
+        fields = ['name', 'slug', 'description', 'is_listed', 'contact_email', 'contact_phone', 'address',
                   'city', 'state', 'postal_code', 'logo', 'cover_image']
         labels = {
             'name': 'Business name', 'slug': 'Booking page address',
             'contact_email': 'Contact email', 'contact_phone': 'Contact phone',
-            'postal_code': 'PIN code', 'cover_image': 'Ground photo',
+            'postal_code': 'PIN code', 'cover_image': 'Ground photo', 'description': 'About your turf', 'is_listed': 'List on Turfio',
         }
         help_texts = {
             'slug': "Customers book at /t/your-address/. You can only change it before you go live.",
             'logo': "JPG, PNG or WebP, up to 2 MB.",
-            'cover_image': "A wide photo of your ground, up to 2 MB.",
+            'cover_image': "A wide photo of your ground, up to 2 MB.", 'description': "A few sentences customers will see on your page.",
+            'is_listed': "Show your turf on the public Turfio marketplace so new customers can find it. You can switch this off any time.",
         }
 
     def __init__(self, *args, **kwargs):
@@ -57,7 +58,14 @@ class ProfileForm(forms.ModelForm):
             self.fields[name].required = True
         if self.instance.pk and self.instance.status != 'onboarding':
             self.fields['slug'].disabled = True
+            self.fields['description'].widget.attrs['rows'] = 3
         _style(self)
+
+    def clean_is_listed(self):
+        value = self.cleaned_data.get('is_listed')
+        if value and self.instance.status != 'active':
+            raise ValidationError("You can list your turf on Turfio once it is live.")
+        return value
 
     def clean_slug(self):
         if self.fields['slug'].disabled:

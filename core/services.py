@@ -9,6 +9,7 @@ from django.core.exceptions import ValidationError as DjangoValidationError
 from .models import (BookableConfig, Booking, PricingRule, TenantDayHours, TenantSettings,
                      TournamentGround, TurfBusiness)
 from .tenancy import tenant_context
+from django.db.models import Q
 
 DAY = 24 * 60
 NO_LIMIT = 10 ** 6
@@ -438,13 +439,22 @@ def conflict_message(config, conflict):
 
 
 @_scoped
-def find_available_configs(tenant, bookable_type, booking_date, start_time, end_time):
-    """Every free, online-bookable option of a type, in display order."""
-    configs = (BookableConfig._base_manager
-               .filter(tenant=tenant, bookable_type=bookable_type, is_active=True, online_bookable=True)
-               .prefetch_related('resources').order_by('display_order', 'name'))
+def sport_offered(tenant, bookable_type, sport):
+    """True if some online option of this type allows the sport (an option with no sports ticked allows all)."""
+    return (BookableConfig._base_manager
+            .filter(tenant=tenant, bookable_type=bookable_type, is_active=True, online_bookable=True)
+            .filter(Q(sports__isnull=True) | Q(sports=sport)).exists())
+
+
+@_scoped
+def find_available_configs(tenant, bookable_type, booking_date, start_time, end_time, sport=None):
+    """Every free, online-bookable option of a type that allows the sport, in display order."""
+    qs = BookableConfig._base_manager.filter(
+        tenant=tenant, bookable_type=bookable_type, is_active=True, online_bookable=True)
+    if sport is not None:
+        qs = qs.filter(Q(sports__isnull=True) | Q(sports=sport)).distinct()
     free = []
-    for cfg in configs:
+    for cfg in qs.prefetch_related('resources').order_by('display_order', 'name'):
         try:
             if not find_conflicting_booking(tenant, cfg, booking_date, start_time, end_time):
                 free.append(cfg)
@@ -453,11 +463,10 @@ def find_available_configs(tenant, bookable_type, booking_date, start_time, end_
     return free
 
 
-def find_available_config(tenant, bookable_type, booking_date, start_time, end_time):
+def find_available_config(tenant, bookable_type, booking_date, start_time, end_time, sport=None):
     """First free option of a type, or None."""
-    free = find_available_configs(tenant, bookable_type, booking_date, start_time, end_time)
+    free = find_available_configs(tenant, bookable_type, booking_date, start_time, end_time, sport)
     return free[0] if free else None
-
 
 @_scoped
 def config_for_single_resource(tenant, resource_id):

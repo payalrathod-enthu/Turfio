@@ -1,0 +1,36 @@
+{% extends "public/site_base.html" %}
+{% block title %}Book a turf{% endblock %}
+{% block content %}
+  <div class="text-center py-5">
+    <h1 class="fw-bold">Your Turf, Just the Way You Want It.</h1>
+    <p class="lead text-muted mx-auto" style="max-width: 640px;">Find a turf, pick your sport and book a slot in a minute. No account needed. Own a turf? Run your bookings, payments and expenses from one place.</p>
+    <div class="d-flex justify-content-center gap-2 flex-wrap mt-3">
+      <a class="btn btn-success btn-lg" href="{% url 'marketplace' %}">Find a Turf</a>
+      <a class="btn btn-outline-dark btn-lg" href="{% url 'signup' %}">For Turf Owners</a>
+    </div>
+  </div>
+
+  <div class="row g-3 mb-4">
+    <div class="col-md-6">
+      <div class="tif-card p-4 h-100">
+        <h5>For players</h5>
+        <ol class="mb-0 small">
+          <li>Open a turf and choose your sport.</li>
+          <li>Pick a date and time. You see what's free and the price.</li>
+          <li>Enter your name and number. Your booking is confirmed straight away.</li>
+        </ol>
+      </div>
+    </div>
+    <div class="col-md-6">
+      <div class="tif-card p-4 h-100">
+        <h5>For turf owners</h5>
+        <ul class="mb-2 small">
+          <li>Set up your grounds, sports, prices and hours in your own way.</li>
+          <li>Customers book online. You are notified.</li>
+          <li>Track payments, expenses and reports.</li>
+        </ul>
+        <a href="{% url 'signup' %}" class="small">Create your account</a> · <a href="{% url 'login_view' %}" class="small">Log in</a>
+      </div>
+    </div>
+  </div>
+{% endblock %}

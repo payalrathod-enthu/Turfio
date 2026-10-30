@@ -3,7 +3,8 @@ from django.urls import path, reverse_lazy
 
 from . import auth_views, public_views, setup_views, sport_views, views
 urlpatterns = [
-    path('', views.dashboard, name='dashboard'),
+    path('', public_views.home, name='dashboard'),
+    path('turfs/', public_views.marketplace, name='marketplace'),
 
     path('bookings/', views.bookings, name='bookings'),
     path('bookings/new/', views.booking_create, name='booking_create'),
