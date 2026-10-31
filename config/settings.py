@@ -86,6 +86,8 @@ INSTALLED_APPS = [
     "crispy_forms",
     "crispy_bootstrap5",
     "core",
+    "cloudinary_storage",
+    "cloudinary",
 ]
 
 CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
@@ -189,22 +191,37 @@ STATICFILES_DIRS = [
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
 
+# Cloudinary configuration
+CLOUDINARY_STORAGE = {
+    "CLOUD_NAME": os.environ.get("CLOUDINARY_CLOUD_NAME"),
+    "API_KEY": os.environ.get("CLOUDINARY_API_KEY"),
+    "API_SECRET": os.environ.get("CLOUDINARY_API_SECRET"),
+}
 
+if os.environ.get("VERCEL"):
+    STORAGES = {
+        "default": {
+            "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage",
+        },
+        "staticfiles": {
+            "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+        },
+    }
 # Email configuration
+
 # Console backend is suitable for local development.
 # Configure SMTP environment variables before enabling email delivery.
+# Email configuration
+# Temporary setup for development and testing.
+# Emails are printed in the terminal instead of being sent.
+
 MAILERS = {
     "default": {
-        "BACKEND": "django.core.mail.backends.smtp.EmailBackend",
-        "OPTIONS": {
-            "host": os.environ.get("EMAIL_HOST", ""),
-            "port": int(os.environ.get("EMAIL_PORT", "587")),
-            "username": os.environ.get("EMAIL_HOST_USER", ""),
-            "password": os.environ.get("EMAIL_HOST_PASSWORD", ""),
-            "use_tls": True,
-        },
+        "BACKEND": "django.core.mail.backends.console.EmailBackend",
     },
 }
+
+DEFAULT_FROM_EMAIL = "Turfio <noreply@turfio.local>"
 
 DEFAULT_FROM_EMAIL = os.environ.get(
     "DEFAULT_FROM_EMAIL",
