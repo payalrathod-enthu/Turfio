@@ -11,10 +11,17 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 import logging
 
 logger = logging.getLogger(__name__)
+
 logger.warning("TURFIO BASE_DIR: %s", BASE_DIR)
+
 logger.warning(
-    "TURFIO landing template exists: %s",
-    (BASE_DIR / "templates" / "public" / "landing.html").exists()
+    "TURFIO TEMPLATE EXISTS: %s",
+    (BASE_DIR / "templates" / "public" / "landing.html").is_file()
+)
+
+logger.warning(
+    "TURFIO TEMPLATES FOLDER EXISTS: %s",
+    (BASE_DIR / "templates").is_dir()
 )
 
 # Security settings
