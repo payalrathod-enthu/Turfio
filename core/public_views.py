@@ -23,9 +23,11 @@ from .tenancy import tenant_context
 # ---------------------------------------------------------------------------
 
 def home(request):
-    from django.http import HttpResponse
-    return HttpResponse("Turfio Django deployment is working!")
-
+    """Logged-in owners and staff get their dashboard; everyone else gets the public landing page."""
+    if request.user.is_authenticated:
+        from .views import dashboard
+        return dashboard(request)
+    return render(request, "public/landing.html")
 
 def marketplace(request):
     q = request.GET.get('q', '').strip()[:80]
