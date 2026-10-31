@@ -8,7 +8,14 @@ load_dotenv(override=False)   # CHANGED: was load_dotenv(). override=True makes 
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+import logging
 
+logger = logging.getLogger(__name__)
+logger.warning("TURFIO BASE_DIR: %s", BASE_DIR)
+logger.warning(
+    "TURFIO landing template exists: %s",
+    (BASE_DIR / "templates" / "public" / "landing.html").exists()
+)
 
 # Security settings
 DEBUG = os.environ.get("DEBUG", "False").lower() == "true"
