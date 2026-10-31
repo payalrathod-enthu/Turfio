@@ -1,0 +1,158 @@
+{% extends "base.html" %}
+{% load form_filters %}
+{% block title %}New Booking{% endblock %}
+{% block content %}
+  <h4 class="mb-3">New Booking</h4>
+
+  {% if messages %}
+    {% for m in messages %}
+      <div class="alert alert-{{ m.tags }} py-2 small">{{ m }}</div>
+    {% endfor %}
+  {% endif %}
+
+  <div class="row g-3">
+    <div class="col-12 col-lg-7">
+      <form id="booking-form" method="post" action="{% url 'booking_create' %}">
+        {% csrf_token %}
+        <div class="tif-card p-3 mb-3">
+          <h6 class="mb-3">Customer</h6>
+          <div class="row g-2">
+            <div class="col-6"><label class="form-label small">Name</label>{{ form.customer_name }}</div>
+            <div class="col-6"><label class="form-label small">Contact Number</label>{{ form.customer_phone }}</div>
+          </div>
+        </div>
+
+        <div class="tif-card p-3 mb-3">
+          <h6 class="mb-3">Booking Details</h6>
+          <div class="row g-2">
+            {% if has_sports %}
+              <div class="col-12">
+                <label class="form-label small">Sport</label>
+                {{ form.sport }}
+                {% for e in form.sport.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
+              </div>
+            {% else %}
+              <div class="col-12"><div class="alert alert-info py-2 small mb-0">No sports are set up yet. <a href="{% url 'settings_sports' %}">Add your sports</a> so every booking records one.</div></div>
+            {% endif %}
+            <div class="col-12">
+              <label class="form-label small">Ground</label>
+              {{ form.config|hx:"hx-get:/bookings/preview/|hx-target:#price-summary|hx-trigger:change|hx-include:#booking-form" }}
+              {% for e in form.config.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
+            </div>
+            <div class="col-4">
+              <label class="form-label small">Date</label>
+              {{ form.date|hx:"hx-get:/bookings/preview/|hx-target:#price-summary|hx-trigger:change|hx-include:#booking-form" }}
+            </div>
+            <div class="col-4">
+              <label class="form-label small">Start Time</label>
+              {{ form.start_time|hx:"hx-get:/bookings/preview/|hx-target:#price-summary|hx-trigger:change|hx-include:#booking-form" }}
+            </div>
+            <div class="col-4">
+              <label class="form-label small">End Time</label>
+              {{ form.end_time|hx:"hx-get:/bookings/preview/|hx-target:#price-summary|hx-trigger:change|hx-include:#booking-form" }}
+            </div>
+            {% if overnight %}
+              <div class="col-12 form-text">Running past midnight? Enter an end time earlier than the start, for example 11:00 PM to 1:00 AM. For a booking that starts after midnight, choose the next calendar date.</div>
+            {% endif %}
+            <div class="col-6 d-flex align-items-center gap-2 mt-2">
+              {{ form.lights }}
+              <label class="form-label small mb-0">Lights (added automatically)</label>
+            </div>
+            <div class="col-6 mt-2">
+              <label class="form-label small">Booking Type</label>
+              {{ form.booking_type }}
+            </div>
+          </div>
+          {% if form.end_time.errors %}
+            <div class="text-danger small mt-2">{{ form.end_time.errors|join:", " }}</div>
+          {% endif %}
+        </div>
+
+        <div class="tif-card p-3 mb-3">
+          <h6 class="mb-3">Discount &amp; Additional Charges</h6>
+          <div class="row g-2">
+            <div class="col-6">
+              <label class="form-label small">Discount Type</label>
+              {{ form.discount_type|hx:"hx-get:/bookings/preview/|hx-target:#price-summary|hx-trigger:change|hx-include:#booking-form" }}
+            </div>
+            <div class="col-6">
+              <label class="form-label small">Discount Value</label>
+              {{ form.discount_value|hx:"hx-get:/bookings/preview/|hx-target:#price-summary|hx-trigger:keyup changed delay:400ms|hx-include:#booking-form" }}
+            </div>
+            <div class="col-6">
+              <label class="form-label small">Additional Charge Description</label>
+              {{ form.additional_charge_desc }}
+            </div>
+            <div class="col-6">
+              <label class="form-label small">Additional Charge Amount</label>
+              {{ form.additional_charge_amount|hx:"hx-get:/bookings/preview/|hx-target:#price-summary|hx-trigger:keyup changed delay:400ms|hx-include:#booking-form" }}
+            </div>
+          </div>
+        </div>
+
+        <div class="tif-card p-3 mb-3">
+          <h6 class="mb-3">Payment</h6>
+          <div class="row g-2">
+            <div class="col-6">
+              <label class="form-label small">Cash Paid</label>
+              {{ form.cash_paid|hx:"hx-get:/bookings/preview/|hx-target:#price-summary|hx-trigger:keyup changed delay:400ms|hx-include:#booking-form" }}
+            </div>
+            <div class="col-6">
+              <label class="form-label small">Online Paid</label>
+              {{ form.online_paid|hx:"hx-get:/bookings/preview/|hx-target:#price-summary|hx-trigger:keyup changed delay:400ms|hx-include:#booking-form" }}
+            </div>
+          </div>
+        </div>
+
+        <div class="tif-card p-3 mb-3">
+          <label class="form-label small">Notes</label>
+          {{ form.notes }}
+        </div>
+
+        <button type="submit" class="btn btn-success w-100 py-2 fw-semibold">CONFIRM BOOKING</button>
+      </form>
+    </div>
+
+    <div class="col-12 col-lg-5">
+      <div id="price-summary" hx-get="{% url 'booking_price_preview' %}" hx-trigger="load" hx-include="#booking-form">
+        <div class="tif-card p-3 text-muted small">Fill in ground, date, and times to see pricing.</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const LIGHTS_START = "{{ lights_start }}";
+    function updateLightsIndicator() {
+      const start = document.querySelector('[name="start_time"]');
+      const end = document.querySelector('[name="end_time"]');
+      const box = document.querySelector('[name="lights"]');
+      if (!end || !box) return;
+      const crossesMidnight = start && start.value && end.value && end.value <= start.value;
+      box.checked = Boolean(LIGHTS_START && end.value && (end.value > LIGHTS_START || crossesMidnight));
+    }
+    document.addEventListener('DOMContentLoaded', updateLightsIndicator);
+    document.addEventListener('change', function (e) {
+      if (e.target.name === 'end_time' || e.target.name === 'start_time') updateLightsIndicator();
+    });
+  </script>
+    {{ config_sports|json_script:"config-sports" }}
+  <script>
+    (function () {
+      const sportSel = document.querySelector('[name="sport"]');
+      const cfgSel = document.querySelector('[name="config"]');
+      if (!sportSel || !cfgSel) return;
+      const allowed = JSON.parse(document.getElementById('config-sports').textContent);
+      function filterOptions() {
+        const sport = sportSel.value;
+        [...cfgSel.options].forEach(function (o) {
+          if (!o.value) return;
+          const list = allowed[o.value] || [];
+          o.disabled = Boolean(sport && list.length && !list.includes(sport));
+        });
+        if (cfgSel.selectedOptions[0] && cfgSel.selectedOptions[0].disabled) cfgSel.value = '';
+      }
+      sportSel.addEventListener('change', filterOptions);
+      filterOptions();
+    })();
+  </script>
+{% endblock %}

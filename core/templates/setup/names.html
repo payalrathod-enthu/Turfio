@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+{% block title %}Name your grounds{% endblock %}
+{% block content %}
+  <h4 class="mb-3">{% if wizard %}Set up your turf{% else %}Settings — Name your grounds{% endif %}</h4>
+  {% include "setup/_steps.html" %}
+
+  {% if resources %}
+    <div class="tif-card p-3 mb-3" style="max-width: 640px;">
+      <h6>Your grounds are already named</h6>
+      <p class="small">{% for r in resources %}<span class="badge badge-status-green me-1">{{ r.name }}</span>{% endfor %}</p>
+      <p class="small text-muted mb-3">You can rename them, add more, or switch some off in the next step. Nothing is deleted if you change your layout.</p>
+      <a class="btn btn-success" href="{% url 'setup_grounds' %}">Continue</a>
+      <a class="btn btn-link" href="{% url 'setup_layout' %}">Change layout</a>
+    </div>
+  {% else %}
+    <div class="tif-card p-3" style="max-width: 640px;">
+
+      {% if layout == 'whole' %}
+        <h5>Name your ground</h5>
+        <div class="dg mb-2"><div>ONE FULL GROUND</div></div>
+        <form method="post" action="{% url 'setup_grounds_action' %}">{% csrf_token %}
+          <input type="hidden" name="action" value="create_whole"><input type="hidden" name="next" value="setup_names">
+          <label class="form-label small mb-1">What is your ground called?</label>
+          <input name="ground_name" class="form-control mb-1" placeholder="e.g. Main Turf" required maxlength="100">
+          <div class="form-text mb-3">Customers will see this name.</div>
+          <label class="form-label small mb-1">What sport or format is it for?</label>
+          <input name="type_name" class="form-control mb-1" placeholder="e.g. Football (optional)" maxlength="100">
+          <div class="form-text mb-3">This is what you set a price for. Leave it empty to use the ground's name.</div>
+          <button class="btn btn-success">Save and continue</button>
+        </form>
+
+      {% elif layout == 'separate' %}
+        <h5>Name your grounds or courts</h5>
+        <div class="dg mb-2"><div>Ground 1</div><div>Ground 2</div><div>Ground 3</div></div>
+        <p class="small text-muted">Each ground can take a separate booking. Booking Ground 1 does not block Ground 2.
+          If some of your grounds share space, go back and choose "one large ground divided into sections".</p>
+        <form method="post" action="{% url 'setup_grounds_action' %}">{% csrf_token %}
+          <input type="hidden" name="action" value="create_separate"><input type="hidden" name="next" value="setup_names">
+          <label class="form-label small mb-1">How many separate grounds or courts do you have?</label>
+          <div class="name-builder" data-label="Ground">
+            <div class="input-group mb-3" style="max-width: 200px;">
+              <button type="button" class="btn btn-outline-secondary minus">−</button>
+              <input type="number" class="form-control text-center count" value="2" min="1" max="20">
+              <button type="button" class="btn btn-outline-secondary plus">+</button>
+            </div>
+            <label class="form-label small mb-1">Name each one</label>
+            <div class="list"></div>
+          </div>
+          <div class="form-check mb-2">
+            <input class="form-check-input" type="checkbox" name="per_ground_type" id="pgt">
+            <label class="form-check-label small" for="pgt">Each ground has its own price</label>
+          </div>
+          <div id="shared-type" class="mb-3">
+            <label class="form-label small mb-1">What sport or format are they?</label>
+            <input name="type_name" class="form-control" placeholder="e.g. Cricket Net">
+            <div class="form-text">All grounds will share one price. Tick the box above if prices differ.</div>
+          </div>
+          <button class="btn btn-success">Save and continue</button>
+        </form>
+
+      {% else %}
+        <h5>Name your ground and its sections</h5>
+        <div class="dg tight mb-2"><div>Section 1</div><div>Section 2</div><div>Section 3</div></div>
+        <p class="small text-muted">You'll choose which combinations customers can book in the next step.</p>
+        <form method="post" action="{% url 'setup_grounds_action' %}">{% csrf_token %}
+          <input type="hidden" name="action" value="create_sections"><input type="hidden" name="next" value="setup_names">
+          <label class="form-label small mb-1">How many sections is your ground divided into?</label>
+          <div class="name-builder" data-label="Section">
+            <div class="input-group mb-3" style="max-width: 200px;">
+              <button type="button" class="btn btn-outline-secondary minus">−</button>
+              <input type="number" class="form-control text-center count" value="3" min="2" max="8">
+              <button type="button" class="btn btn-outline-secondary plus">+</button>
+            </div>
+            <label class="form-label small mb-1">Name each section</label>
+            <div class="list"></div>
+          </div>
+          <div class="form-check mb-2">
+            <input class="form-check-input" type="checkbox" name="add_whole" id="aw" checked>
+            <label class="form-check-label small" for="aw">Also let customers book the whole ground</label>
+          </div>
+          <div class="mb-3">
+            <label class="form-label small mb-1">Name of the whole ground</label>
+            <input name="whole_name" class="form-control" value="Full ground" maxlength="100">
+            <div class="form-text">Only used for the "whole ground" option.</div>
+          </div>
+          <button class="btn btn-success">Save and continue</button>
+        </form>
+      {% endif %}
+    </div>
+  {% endif %}
+
+  <script>
+    document.querySelectorAll('.name-builder').forEach(function (box) {
+      const count = box.querySelector('.count'), list = box.querySelector('.list'), label = box.dataset.label;
+      const min = +count.min, max = +count.max;
+      function draw() {
+        const n = Math.max(min, Math.min(max, parseInt(count.value) || min));
+        count.value = n;
+        const old = [...list.querySelectorAll('input')].map(i => i.value);
+        list.innerHTML = '';
+        for (let i = 0; i < n; i++) {
+          const row = document.createElement('div'); row.className = 'mb-2 d-flex align-items-center gap-2';
+          const num = document.createElement('span'); num.className = 'small text-muted'; num.style.width = '1.5rem'; num.textContent = (i + 1) + '.';
+          const input = document.createElement('input'); input.name = 'names'; input.required = true; input.maxLength = 100;
+          input.className = 'form-control form-control-sm'; input.value = old[i] || (label + ' ' + (i + 1));
+          row.append(num, input); list.append(row);
+        }
+      }
+      box.querySelector('.minus').onclick = () => { count.value = (+count.value) - 1; draw(); };
+      box.querySelector('.plus').onclick = () => { count.value = (+count.value) + 1; draw(); };
+      count.addEventListener('change', draw);
+      draw();
+    });
+    const pgt = document.getElementById('pgt');
+    if (pgt) {
+      const shared = document.getElementById('shared-type');
+      const sync = () => { shared.style.display = pgt.checked ? 'none' : ''; };
+      pgt.addEventListener('change', sync); sync();
+    }
+  </script>
+{% endblock %}

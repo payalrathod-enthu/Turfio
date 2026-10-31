@@ -1,0 +1,160 @@
+{% extends "base.html" %}
+{% block title %}What customers can book{% endblock %}
+{% block content %}
+  <h4 class="mb-3">{% if wizard %}Set up your turf{% else %}Settings — What customers can book{% endif %}</h4>
+  {% include "setup/_steps.html" %}
+
+  {% if not resource_rows %}
+    <div class="alert alert-info small"><strong>Start here:</strong> <a href="{% url 'setup_names' %}">name your grounds</a> first.</div>
+  {% elif not config_rows %}
+    <div class="alert alert-info small"><strong>Next step:</strong> tell us what customers can book. Use the quick buttons below, or build your own option on the right.</div>
+  {% endif %}
+
+  <p class="text-muted small">
+    Each option below is something a customer can book. It uses one or more parts of your ground.
+    <strong>Two options that share a part can never be booked at the same time.</strong>
+    Prices are set per <em>playing format</em>, so options with the same format share one price.
+  </p>
+
+  <div class="row g-3">
+    <div class="col-12 col-lg-5">
+      <div class="tif-card p-3 mb-3">
+        <h6 class="mb-3">Your grounds and sections</h6>
+        <table class="table table-sm align-middle mb-3"><tbody>
+          {% for row in resource_rows %}
+            <tr class="{% if not row.resource.is_active %}text-muted{% endif %}">
+              <td>
+                <form method="post" action="{% url 'setup_grounds_action' %}" class="d-flex gap-1">{% csrf_token %}
+                  <input type="hidden" name="action" value="rename_resource"><input type="hidden" name="resource_id" value="{{ row.resource.id }}">
+                  <input name="name" value="{{ row.resource.name }}" class="form-control form-control-sm">
+                  <button class="btn btn-sm btn-outline-secondary">Rename</button>
+                </form>
+              </td>
+              <td class="text-end small text-nowrap">
+                <form method="post" action="{% url 'setup_grounds_action' %}" class="d-inline">{% csrf_token %}
+                  <input type="hidden" name="action" value="toggle_resource"><input type="hidden" name="resource_id" value="{{ row.resource.id }}">
+                  <button class="btn btn-link btn-sm p-0">{% if row.resource.is_active %}Switch off{% else %}Switch on{% endif %}</button>
+                </form>
+                {% if row.can_delete %}·
+                <form method="post" action="{% url 'setup_grounds_action' %}" class="d-inline" onsubmit="return confirm('Delete this?');">{% csrf_token %}
+                  <input type="hidden" name="action" value="delete_resource"><input type="hidden" name="resource_id" value="{{ row.resource.id }}">
+                  <button class="btn btn-link btn-sm text-danger p-0">Delete</button>
+                </form>{% endif %}
+              </td>
+            </tr>
+          {% empty %}<tr><td class="text-muted small">Nothing yet.</td></tr>{% endfor %}
+        </tbody></table>
+        <form method="post" action="{% url 'setup_grounds_action' %}" class="d-flex gap-2">{% csrf_token %}
+          <input type="hidden" name="action" value="add_resource">
+          <input name="name" class="form-control form-control-sm" placeholder="Add another ground or section" required>
+          <button class="btn btn-success btn-sm">Add</button>
+        </form>
+      </div>
+
+      {% if active_resources|length > 1 %}
+        <div class="tif-card p-3 mb-3">
+          <h6>Quick add</h6>
+          <datalist id="type-list">{% for n in type_names %}<option value="{{ n }}">{% endfor %}</datalist>
+          <form method="post" action="{% url 'setup_grounds_action' %}" class="mb-3">{% csrf_token %}
+            <input type="hidden" name="action" value="add_singles">
+            <label class="form-label small mb-1">Let customers book each part on its own</label>
+            <div class="d-flex gap-2">
+              <input name="type_name" list="type-list" class="form-control form-control-sm" placeholder="Playing format, e.g. 6-a-side" required>
+              <button class="btn btn-outline-success btn-sm text-nowrap">Add</button>
+            </div>
+          </form>
+          {% if sizes %}
+          <form method="post" action="{% url 'setup_grounds_action' %}">{% csrf_token %}
+            <input type="hidden" name="action" value="add_neighbours">
+            <label class="form-label small mb-1">Combine parts that sit next to each other</label>
+            <div class="d-flex gap-2">
+              <input name="type_name" list="type-list" class="form-control form-control-sm" placeholder="Playing format, e.g. 8-a-side" required>
+              <select name="size" class="form-select form-select-sm" style="max-width: 130px;">
+                {% for n in sizes %}<option value="{{ n }}">{{ n }} parts</option>{% endfor %}
+              </select>
+              <button class="btn btn-outline-success btn-sm text-nowrap">Add</button>
+            </div>
+            <div class="form-text">With 3 sections and "2 parts" you get 1 + 2 and 2 + 3.</div>
+          </form>
+          {% endif %}
+        </div>
+      {% endif %}
+    </div>
+
+    <div class="col-12 col-lg-7">
+      <div class="tif-card p-3 mb-3">
+        <h6 class="mb-3">What customers can book</h6>
+        <table class="table table-sm align-middle mb-3">
+          <thead class="text-muted small"><tr><th>Name customers see</th><th>Format</th><th>Parts used</th><th>Online</th><th></th></tr></thead>
+          <tbody>
+            {% for row in config_rows %}
+              <tr class="{% if not row.config.is_active %}text-muted{% endif %}">
+                <td>
+                  <form method="post" action="{% url 'setup_grounds_action' %}" class="d-flex gap-1">{% csrf_token %}
+                    <input type="hidden" name="action" value="rename_config"><input type="hidden" name="config_id" value="{{ row.config.id }}">
+                    <input name="name" value="{{ row.config.name }}" class="form-control form-control-sm">
+                    <button class="btn btn-sm btn-outline-secondary">Rename</button>
+                  </form>
+                </td>
+                <td class="small">{{ row.config.bookable_type.name }}</td>
+                <td class="small">{% for r in row.resources %}{{ r.name }}{% if not forloop.last %} + {% endif %}{% endfor %}</td>
+                <td class="small">
+                  <form method="post" action="{% url 'setup_grounds_action' %}">{% csrf_token %}
+                    <input type="hidden" name="action" value="toggle_online"><input type="hidden" name="config_id" value="{{ row.config.id }}">
+                    <button class="btn btn-link btn-sm p-0">{% if row.config.online_bookable %}On{% else %}Staff only{% endif %}</button>
+                  </form>
+                </td>
+                <td class="small text-end text-nowrap">
+                  <form method="post" action="{% url 'setup_grounds_action' %}" class="d-inline">{% csrf_token %}
+                    <input type="hidden" name="action" value="toggle_config"><input type="hidden" name="config_id" value="{{ row.config.id }}">
+                    <button class="btn btn-link btn-sm p-0">{% if row.config.is_active %}Switch off{% else %}Switch on{% endif %}</button>
+                  </form>
+                  {% if row.can_delete %}·
+                  <form method="post" action="{% url 'setup_grounds_action' %}" class="d-inline" onsubmit="return confirm('Delete this option?');">{% csrf_token %}
+                    <input type="hidden" name="action" value="delete_config"><input type="hidden" name="config_id" value="{{ row.config.id }}">
+                    <button class="btn btn-link btn-sm text-danger p-0">Delete</button>
+                  </form>{% endif %}
+                </td>
+              </tr>
+            {% empty %}<tr><td colspan="5" class="text-muted small">Nothing yet.</td></tr>{% endfor %}
+          </tbody>
+        </table>
+        <p class="small text-muted">"Online: On" means customers can pick it on your booking page. "Staff only" means only you can book it. A booked option's parts can't be edited. Switch it off and add a new one instead.</p>
+
+        <h6 class="mb-2">Build your own option</h6>
+        <form method="post" action="{% url 'setup_grounds_action' %}">{% csrf_token %}
+          <input type="hidden" name="action" value="add_config">
+          <div class="row g-2 mb-2">
+            <div class="col-6"><label class="form-label small mb-1">Playing format (what you set a price for)</label>
+              <input name="type_name" list="type-list" class="form-control form-control-sm" placeholder="e.g. 9-a-side" required></div>
+            <div class="col-6"><label class="form-label small mb-1">Name customers see (optional)</label>
+              <input name="option_name" class="form-control form-control-sm" placeholder="Filled in for you"></div>
+          </div>
+          <label class="form-label small mb-1">Which parts does it use?</label>
+          <div class="d-flex flex-wrap gap-3 mb-2">
+            {% for r in active_resources %}
+              <div class="form-check"><input class="form-check-input" type="checkbox" name="resources" value="{{ r.id }}" id="res-{{ r.id }}">
+                <label class="form-check-label small" for="res-{{ r.id }}">{{ r.name }}</label></div>
+            {% empty %}<span class="text-muted small">Add a ground or section first.</span>{% endfor %}
+          </div>
+          <button class="btn btn-success btn-sm">Add option</button>
+        </form>
+      </div>
+
+      <div class="tif-card p-3 mb-3">
+        <h6 class="mb-2">What blocks what</h6>
+        <table class="table table-sm mb-0">
+          <thead class="text-muted small"><tr><th>If this is booked…</th><th>…these can't be booked at the same time</th></tr></thead>
+          <tbody>
+            {% for row in conflicts %}
+              <tr><td class="small">{{ row.config.name }}</td>
+                  <td class="small">{% if row.blocks %}{{ row.blocks|join:", " }}{% else %}<span class="text-muted">Nothing else</span>{% endif %}</td></tr>
+            {% empty %}<tr><td colspan="2" class="text-muted small">Nothing to show yet.</td></tr>{% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  {% if wizard %}<a href="{% url 'setup_hours' %}" class="btn btn-success">Continue to hours & rules</a>{% endif %}
+{% endblock %}

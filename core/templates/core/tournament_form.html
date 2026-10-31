@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}New Tournament{% endblock %}
+{% block content %}
+  <h4 class="mb-3">New Tournament</h4>
+  {% if messages %}{% for m in messages %}<div class="alert alert-{{ m.tags }} py-2 small">{{ m }}</div>{% endfor %}{% endif %}
+  <form method="post" class="tif-card p-3">
+    {% csrf_token %}
+    <div class="row g-2 mb-2">
+      <div class="col-6"><label class="form-label small">Tournament Name</label>{{ form.name }}</div>
+      <div class="col-6"><label class="form-label small">Organizer</label>{{ form.organizer }}</div>
+      <div class="col-6"><label class="form-label small">Contact</label>{{ form.contact }}</div>
+      <div class="col-6"><label class="form-label small">Date</label>{{ form.date }}</div>
+      <div class="col-6"><label class="form-label small">Start Time</label>{{ form.start_time }}</div>
+      <div class="col-6"><label class="form-label small">End Time</label>{{ form.end_time }}</div>
+    </div>
+    {% if form.end_time.errors %}<div class="text-danger small mb-2">{{ form.end_time.errors|join:", " }}</div>{% endif %}
+
+    <label class="form-label small">Grounds Used</label>
+    <div class="mb-3">{{ form.grounds }}</div>
+
+    <div class="row g-2 mb-2">
+      <div class="col-6"><label class="form-label small">Base Ground Charges</label>{{ form.base_ground_charges }}</div>
+      <div class="col-6"><label class="form-label small">Premises Charges</label>{{ form.premises_charges }}</div>
+      <div class="col-6"><label class="form-label small">Additional Charges</label>{{ form.additional_charges }}</div>
+      <div class="col-6"><label class="form-label small">Discount</label>{{ form.discount }}</div>
+      <div class="col-6"><label class="form-label small">Amount Received</label>{{ form.amount_received }}</div>
+    </div>
+    <div class="mb-3"><label class="form-label small">Notes</label>{{ form.notes }}</div>
+
+    <button class="btn btn-success w-100">Create Tournament</button>
+  </form>
+{% endblock %}

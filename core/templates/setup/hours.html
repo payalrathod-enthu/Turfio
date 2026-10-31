@@ -1,0 +1,201 @@
+{% extends "base.html" %}
+{% block title %}Hours & rules{% endblock %}
+{% block content %}
+  <h4 class="mb-3">{% if wizard %}Set up your turf{% else %}Settings — Hours & rules{% endif %}</h4>
+  {% include "setup/_steps.html" %}
+
+  <form method="post">
+    {% csrf_token %}
+    {% for e in form.non_field_errors %}<div class="alert alert-danger py-2 small">{{ e }}</div>{% endfor %}
+    <div class="row g-3">
+      <div class="col-12 col-lg-7">
+
+        <div class="tif-card p-3 mb-3">
+          <h6>When is your turf open?</h6>
+          <p class="small text-muted">Switch a day off if you're closed. Open late? Enter a closing time earlier than the opening time and we'll treat it as after midnight. For example, open 6:00 AM and close 1:00 AM. After-midnight closing can be up to 6:00 AM.</p>
+          <table class="table table-sm align-middle mb-2">
+            <thead class="text-muted small"><tr><th>Day</th><th>Open</th><th>Opens</th><th>Closes</th><th></th></tr></thead>
+            <tbody>
+              {% for d in form.day_rows %}
+                <tr>
+                  <td class="fw-semibold small">{{ d.label }}</td>
+                  <td><div class="form-check form-switch">{{ d.open }}</div></td>
+                  <td style="min-width:110px">{{ d.start }}</td>
+                  <td style="min-width:110px">{{ d.end }}</td>
+                  <td class="small text-muted" id="note-{{ forloop.counter0 }}"></td>
+                </tr>
+                {% if d.start.errors or d.end.errors %}
+                  <tr><td colspan="5" class="text-danger small pt-0">{% for e in d.start.errors %}{{ e }} {% endfor %}{% for e in d.end.errors %}{{ e }} {% endfor %}</td></tr>
+                {% endif %}
+              {% endfor %}
+            </tbody>
+          </table>
+          <button type="button" id="copy-hours" class="btn btn-outline-secondary btn-sm">Copy Monday's hours to all days</button>
+        </div>
+
+        <div class="tif-card p-3 mb-3">
+          <h6>When can customers start a booking?</h6>
+          <label class="form-label small mb-1">{{ form.slot_interval_minutes.label }}</label>
+          {{ form.slot_interval_minutes }}
+          <div class="form-text">How often can a new booking start? If you choose every 30 minutes, customers can start at 6:00, 6:30, 7:00 and so on. This is not the length of a booking.</div>
+        </div>
+
+        <div class="tif-card p-3 mb-3">
+          <h6>How long can customers book for?</h6>
+          <div class="row g-2">
+            <div class="col-6"><label class="form-label small mb-1">{{ form.min_duration_minutes.label }}</label>{{ form.min_duration_minutes }}</div>
+            <div class="col-6"><label class="form-label small mb-1">{{ form.max_duration_minutes.label }}</label>{{ form.max_duration_minutes }}
+              {% for e in form.max_duration_minutes.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}</div>
+          </div>
+          <div class="form-text">A booking uses the ground for its whole length. A 2-hour booking starting at 6:00 PM keeps the ground busy until 8:00 PM.</div>
+        </div>
+
+        <div class="tif-card p-3 mb-3">
+          <h6>How early must customers book?</h6>
+          <div class="row g-2">
+            <div class="col-6"><label class="form-label small mb-1">{{ form.min_advance_notice_minutes.label }}</label>{{ form.min_advance_notice_minutes }}</div>
+            <div class="col-6"><label class="form-label small mb-1">{{ form.max_advance_days.label }}</label>{{ form.max_advance_days }}</div>
+          </div>
+          <div class="form-text">Choose how much advance notice customers must give when booking <strong>online</strong>. It does not change your opening hours or booking length, and you and your staff can still add bookings at short notice.</div>
+        </div>
+
+        <div class="tif-card p-3 mb-3">
+          <h6>When are lights available?</h6>
+          {% for radio in form.lights_mode %}
+            <div class="form-check mb-1">{{ radio.tag }} <label class="form-check-label" for="{{ radio.id_for_label }}">{{ radio.choice_label }}</label></div>
+          {% endfor %}
+          <div id="lights-times" class="mt-2">
+            <div class="mb-2">
+              <span class="small text-muted me-1">Quick pick:</span>
+              
+              <button type="button" class="btn btn-outline-secondary btn-sm lights-chip" data-time="17:00">5:00 PM</button>
+              <button type="button" class="btn btn-outline-secondary btn-sm lights-chip" data-time="17:30">5:30 PM</button>
+              <button type="button" class="btn btn-outline-secondary btn-sm lights-chip" data-time="18:00">6:00 PM</button>
+              <button type="button" class="btn btn-outline-secondary btn-sm lights-chip" data-time="18:30">6:30 PM</button>
+              <button type="button" class="btn btn-outline-secondary btn-sm lights-chip" data-time="19:00">7:00 PM</button>
+              <button type="button" class="btn btn-outline-secondary btn-sm lights-chip" data-time="20:00">8:00 PM</button>
+            </div>
+            <div class="row g-2">
+              <div class="col-6"><label class="form-label small mb-1">{{ form.lights_start.label }}</label>{{ form.lights_start }}
+                {% for e in form.lights_start.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}</div>
+              <div class="col-6"><label class="form-label small mb-1">{{ form.lights_end.label }}</label>{{ form.lights_end }}
+                {% for e in form.lights_end.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}</div>
+            </div>
+          </div>
+          <div class="form-text">It gets dark earlier or later through the year, so change this whenever you need to. The new time applies to <strong>new</strong> bookings. Bookings already made keep the price they were made at. Lights are applied by the clock: the part of a booking inside this window is charged your "with lights" price, and the rest uses the normal price. Leave "go off at" empty to keep lights on until you close.</div>
+        </div>
+
+        <details class="tif-card p-3 mb-3">
+          <summary class="fw-semibold">Advanced settings</summary>
+          <div class="mt-2">
+            <label class="form-label small mb-1">{{ form.booking_code_prefix.label }}</label>{{ form.booking_code_prefix }}
+            {% for e in form.booking_code_prefix.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
+            <div class="form-text">Your booking numbers look like {{ form.booking_code_prefix.value|default:"BK" }}-1001. Change it only if you want a different short name.</div>
+          </div>
+        </details>
+
+        <button class="btn btn-success">{% if wizard %}Save and continue{% else %}Save{% endif %}</button>
+      </div>
+
+      <div class="col-12 col-lg-5">
+        <div class="preview-box" style="position: sticky; top: 1rem;">
+          <h6>See how it works</h6>
+          <p class="small text-muted">An example based on your choices. It is <strong>not</strong> live availability.</p>
+          <p class="small mb-2"><strong>Open:</strong> <span id="ex-open">—</span></p>
+          <p class="small mb-2"><strong>Start times:</strong> <span id="ex-starts">—</span></p>
+          <p class="small mb-2"><strong>Booking length:</strong> <span id="ex-duration">—</span></p>
+          <p class="small mb-2"><strong>Notice:</strong> <span id="ex-notice">—</span></p>
+          <p class="small mb-0"><strong>Lights:</strong> <span id="ex-lights">—</span></p>
+        </div>
+      </div>
+    </div>
+  </form>
+
+  <script>
+    (function () {
+      const q = n => document.querySelector('[name="' + n + '"]');
+      const toMin = v => { if (!v) return null; const p = v.split(':'); return (+p[0]) * 60 + (+p[1]); };
+      const fmt = m => { m = ((m % 1440) + 1440) % 1440; let h = Math.floor(m / 60); const mm = m % 60;
+        const ap = h >= 12 ? 'PM' : 'AM'; h = h % 12 || 12; return h + ':' + String(mm).padStart(2, '0') + ' ' + ap; };
+      const dur = m => { const h = Math.floor(m / 60), r = m % 60; return (h ? h + ' hr' : '') + (h && r ? ' ' : '') + (r ? r + ' min' : ''); };
+
+      function dayNotes() {
+        for (let i = 0; i < 7; i++) {
+          const open = q('day_' + i + '_open').checked;
+          const s = toMin(q('day_' + i + '_start').value), e = toMin(q('day_' + i + '_end').value);
+          document.getElementById('note-' + i).textContent =
+            !open ? 'Closed' : (s != null && e != null && e < s ? 'Closes after midnight' : '');
+        }
+      }
+      function firstOpen() {
+        for (let i = 0; i < 7; i++) {
+          if (q('day_' + i + '_open').checked) {
+            const o = toMin(q('day_' + i + '_start').value); let c = toMin(q('day_' + i + '_end').value);
+            if (o != null && c != null && c <= o) c += 1440;
+            return [o, c];
+          }
+        }
+        return [null, null];
+      }
+      function lightsWindow() {
+        const m = document.querySelector('[name="lights_mode"]:checked'); const mode = m ? m.value : 'none';
+        if (mode === 'none') return null;
+        if (mode === 'always') return [0, 1e6];
+        const s = toMin(q('lights_start').value); let e = toMin(q('lights_end').value);
+        if (s == null) return null;
+        if (e != null && e <= s) e += 1440;
+        return [s, e == null ? 1e6 : e];
+      }
+      function draw() {
+        dayNotes();
+        const iv = +q('slot_interval_minutes').value, mn = +q('min_duration_minutes').value,
+              mx = +q('max_duration_minutes').value, nt = +q('min_advance_notice_minutes').value;
+        const [o, c] = firstOpen();
+
+        document.getElementById('ex-open').textContent = (o != null && c != null)
+          ? fmt(o) + ' – ' + fmt(c) + (c > 1440 ? ' (closes after midnight)' : '') + ' on your first open day'
+          : 'Set your opening hours first.';
+
+        const starts = [];
+        if (o != null && c != null && c > o) { for (let t = o; t + mn <= c && starts.length < 7; t += iv) starts.push(fmt(t)); }
+        document.getElementById('ex-starts').textContent = starts.length ? starts.join(', ') + ' …' : 'Set your opening hours first.';
+
+        const sample = (o != null ? o : 18 * 60);
+        document.getElementById('ex-duration').textContent =
+          'Customers can book from ' + dur(mn) + ' up to ' + dur(mx) + '. A ' + dur(mn) + ' booking starting at ' +
+          fmt(sample) + ' uses the ground until ' + fmt(sample + mn) + '.';
+
+        const now = 17 * 60, earliest = Math.ceil((now + nt) / iv) * iv;
+        document.getElementById('ex-notice').textContent = nt === 0
+          ? 'No notice needed. A customer booking online at 5:00 PM can pick the next start time (' + fmt(Math.ceil(now / iv) * iv) + ').'
+          : 'A customer booking online at 5:00 PM cannot pick a start earlier than ' + fmt(earliest) +
+            (earliest >= 1440 ? ' tomorrow' : '') + ' (if that time is open and free).';
+
+        const L = lightsWindow(), bs = 17 * 60, be = 19 * 60;
+        if (!L) {
+          document.getElementById('ex-lights').textContent = 'No lights price is ever charged.';
+        } else {
+          const lm = Math.max(0, Math.min(be, L[1]) - Math.max(bs, L[0]));
+          document.getElementById('ex-lights').textContent = 'A booking from 5:00 PM to 7:00 PM is ' +
+            (dur(be - bs - lm) || '0 min') + ' at the normal price and ' + (dur(lm) || '0 min') + ' at the lights price.';
+        }
+        document.getElementById('lights-times').style.display =
+          (document.querySelector('[name="lights_mode"]:checked') || {}).value === 'from' ? '' : 'none';
+      }
+      document.querySelectorAll('.lights-chip').forEach(function (b) {
+        b.onclick = function () {
+          document.querySelector('[name="lights_mode"][value="from"]').checked = true;
+          q('lights_start').value = b.dataset.time; draw();
+        };
+      });
+      document.getElementById('copy-hours').onclick = function () {
+        const o = q('day_0_open').checked, s = q('day_0_start').value, e = q('day_0_end').value;
+        for (let i = 1; i < 7; i++) { q('day_' + i + '_open').checked = o; q('day_' + i + '_start').value = s; q('day_' + i + '_end').value = e; }
+        draw();
+      };
+      document.addEventListener('input', draw);
+      document.addEventListener('change', draw);
+      draw();
+    })();
+  </script>
+{% endblock %}

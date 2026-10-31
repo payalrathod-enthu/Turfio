@@ -1,0 +1,11 @@
+{% extends "auth_base.html" %}
+{% block title %}Resend verification{% endblock %}
+{% block content %}
+  <p class="small text-muted">Enter your email and we'll send a new confirmation link.</p>
+  <form method="post">
+    {% csrf_token %}
+    <div class="mb-3">{{ form.email }}{% for e in form.email.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}</div>
+    <button class="btn btn-success w-100">Send link</button>
+  </form>
+  <div class="small mt-3 text-center"><a href="{% url 'login_view' %}">Back to sign in</a></div>
+{% endblock %}

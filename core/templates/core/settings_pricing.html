@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% load inr_filters %}
+{% block title %}Pricing Settings{% endblock %}
+{% block content %}
+  <h4 class="mb-3">Settings — Pricing</h4>
+  {% if messages %}{% for m in messages %}<div class="alert alert-{{ m.tags }} py-2 small">{{ m }}</div>{% endfor %}{% endif %}
+
+  <div class="row g-3">
+    <div class="col-12 col-lg-5">
+      <div class="tif-card p-3">
+        <h6 class="mb-3">Add / Update Rule</h6>
+        <form method="post">
+          {% csrf_token %}
+          <div class="mb-2"><label class="form-label small">Day Type</label>{{ form.day_type }}</div>
+          <div class="mb-2"><label class="form-label small">Ground Type</label>{{ form.ground_type }}</div>
+          <div class="mb-2 d-flex align-items-center gap-2">{{ form.lights }}<label class="form-label small mb-0">Lights</label></div>
+          <div class="mb-3"><label class="form-label small">Price/Hour (₹)</label>{{ form.price_per_hour }}</div>
+          <button class="btn btn-success btn-sm w-100">Save Rule</button>
+          <p class="text-muted small mt-2 mb-0">If a rule already exists for this combination, it will be updated instead of duplicated.</p>
+        </form>
+      </div>
+    </div>
+    <div class="col-12 col-lg-7">
+      <div class="tif-card p-3">
+        <h6 class="mb-3">All Pricing Rules</h6>
+        <table class="table table-sm">
+          <thead class="text-muted small"><tr><th>Ground</th><th>Day</th><th>Lights</th><th>Price/hr</th><th>Status</th><th></th></tr></thead>
+          <tbody>
+            {% for r in rules %}
+              <tr>
+                <td>{{ r.ground_type }}</td>
+                <td>{{ r.get_day_type_display }}</td>
+                <td>{{ r.lights|yesno:"Yes,No" }}</td>
+                <td>{{ r.price_per_hour|inr }}</td>
+                <td>{% if r.is_active %}<span class="badge badge-status-green">Active</span>{% else %}<span class="badge badge-status-muted">Inactive</span>{% endif %}</td>
+                <td>
+                  <form method="post" action="{% url 'settings_pricing_toggle' r.id %}">
+                    {% csrf_token %}
+                    <button class="btn btn-sm btn-outline-secondary">{% if r.is_active %}Deactivate{% else %}Activate{% endif %}</button>
+                  </form>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+{% endblock %}

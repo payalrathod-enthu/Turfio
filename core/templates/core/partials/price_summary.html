@@ -1,0 +1,66 @@
+{% load inr_filters %}
+<div class="tif-card p-3">
+  <h6 class="mb-3">Booking Summary</h6>
+
+  {% if errors %}
+    {% for e in errors %}
+      <div class="alert alert-danger py-2 small mb-2">{{ e }}</div>
+    {% endfor %}
+  {% endif %}
+
+  {% if r.duration_minutes %}
+    <div class="d-flex justify-content-between small text-muted mb-1">
+      <span>Duration</span><span>{{ r.duration_label }}</span>
+    </div>
+    <div class="d-flex justify-content-between small text-muted mb-2">
+      <span>Day Type</span><span>{{ r.day_type|title }}</span>
+    </div>
+
+    {% if r.base_amount %}
+      {% if r.daylight_minutes %}
+        <div class="d-flex justify-content-between small text-muted mb-1">
+          <span>Daylight ({{ r.daylight_minutes }} min)</span><span>{{ r.daylight_rate|inr }}/hr → {{ r.daylight_amount|inr }}</span>
+        </div>
+      {% endif %}
+      {% if r.lights_minutes %}
+        <div class="d-flex justify-content-between small text-muted mb-1">
+          <span>Lights ({{ r.lights_minutes }} min)</span><span>{{ r.lights_rate|inr }}/hr → {{ r.lights_amount|inr }}</span>
+        </div>
+      {% endif %}
+
+      <div class="d-flex justify-content-between mb-1 mt-2">
+        <span>Base Amount</span><span>{{ r.base_amount|inr }}</span>
+      </div>
+      {% if r.discount_amount %}
+        <div class="d-flex justify-content-between mb-1 text-danger">
+          <span>Discount</span><span>-{{ r.discount_amount|inr }}</span>
+        </div>
+      {% endif %}
+      {% if r.additional_amount %}
+        <div class="d-flex justify-content-between mb-1">
+          <span>Additional</span><span>+{{ r.additional_amount|inr }}</span>
+        </div>
+      {% endif %}
+      <hr>
+      <div class="d-flex justify-content-between fw-bold fs-5 mb-3">
+        <span>TOTAL</span><span>{{ r.final_amount|inr }}</span>
+      </div>
+
+      <div class="d-flex justify-content-between small mb-1">
+        <span>Paid Cash</span><span>{{ r.cash_paid|inr }}</span>
+      </div>
+      <div class="d-flex justify-content-between small mb-2">
+        <span>Paid Online</span><span>{{ r.online_paid|inr }}</span>
+      </div>
+      <hr>
+      <div class="d-flex justify-content-between mb-1">
+        <span>Received</span><span>{{ r.total_received|inr }}</span>
+      </div>
+      <div class="d-flex justify-content-between fw-semibold {% if r.balance > 0 %}text-danger{% endif %}">
+        <span>Balance</span><span>{{ r.balance|inr }}</span>
+      </div>
+    {% endif %}
+  {% else %}
+    <p class="text-muted small mb-0">Fill in ground, date, and times to see pricing.</p>
+  {% endif %}
+</div>

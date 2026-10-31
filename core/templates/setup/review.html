@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% load inr_filters %}
+{% block title %}Review{% endblock %}
+{% block content %}
+  <h4 class="mb-3">{% if wizard %}Set up your turf{% else %}Settings — Summary{% endif %}</h4>
+  {% include "setup/_steps.html" %}
+
+  {% if wizard %}
+    {% if status.ok %}
+      <div class="alert alert-success small">Everything is ready. Check the details, then go live.</div>
+    {% else %}
+      <div class="alert alert-warning small"><strong>Not ready yet:</strong>
+        <ul class="mb-0">{% for key, items in status.problems.items %}{% for p in items %}<li>{{ p }}</li>{% endfor %}{% endfor %}</ul>
+      </div>
+    {% endif %}
+  {% else %}
+    <p class="small">Your booking page: <a href="{{ public_path }}">{{ public_path }}</a></p>
+  {% endif %}
+
+  <div class="row g-3">
+    <div class="col-12 col-lg-6">
+      <div class="tif-card p-3 mb-3">
+        <div class="d-flex justify-content-between"><h6>Your business</h6><a class="small" href="{% url 'setup_profile' %}">Change</a></div>
+        <p class="mb-1 fw-semibold">{{ biz.name }}</p>
+        <p class="small mb-1">{{ biz.address }}, {{ biz.city }}{% if biz.state %}, {{ biz.state }}{% endif %} {{ biz.postal_code }}</p>
+        <p class="small mb-1">{{ biz.contact_phone }} · {{ biz.contact_email }}</p>
+        <p class="small mb-0">Booking page address: <code>{{ public_path }}</code></p>
+      </div>
+
+      <div class="tif-card p-3 mb-3">
+        <div class="d-flex justify-content-between"><h6>When you're open</h6><a class="small" href="{% url 'setup_hours' %}">Change</a></div>
+        <table class="table table-sm mb-2">
+          {% for d in week_rows %}
+            <tr><td class="small">{{ d.day }}</td>
+              <td class="small">{% if d.row.is_open %}{{ d.row.open_time|time:"g:i A" }} – {{ d.row.close_time|time:"g:i A" }}{% else %}<span class="text-muted">Closed</span>{% endif %}</td></tr>
+          {% endfor %}
+        </table>
+        <p class="small mb-0">{{ lights_text }}</p>
+      </div>
+
+      <div class="tif-card p-3 mb-3">
+        <div class="d-flex justify-content-between"><h6>Booking rules</h6><a class="small" href="{% url 'setup_hours' %}">Change</a></div>
+        <ul class="small mb-0">{% for r in rules %}<li>{{ r }}</li>{% endfor %}</ul>
+      </div>
+    </div>
+
+    <div class="col-12 col-lg-6">
+      <div class="tif-card p-3 mb-3">
+        <div class="d-flex justify-content-between"><h6>What customers can book</h6><a class="small" href="{% url 'setup_grounds' %}">Change</a></div>
+        {% if layout_label %}<p class="small text-muted">Your layout: {{ layout_label }}</p>{% endif %}
+        <table class="table table-sm mb-0">
+          {% for row in conflicts %}
+            <tr><td class="small fw-semibold">{{ row.config.name }}</td>
+              <td class="small">{% for r in row.resources %}{{ r.name }}{% if not forloop.last %} + {% endif %}{% endfor %}</td>
+              <td class="small text-muted">{% if row.blocks %}also blocks {{ row.blocks|join:", " }}{% endif %}</td></tr>
+          {% empty %}<tr><td class="small text-muted">Nothing yet.</td></tr>{% endfor %}
+        </table>
+      </div>
+
+      <div class="tif-card p-3 mb-3">
+        <div class="d-flex justify-content-between"><h6>Prices (per hour)</h6><a class="small" href="{% url 'setup_pricing' %}">Change</a></div>
+        <table class="table table-sm mb-0">
+          {% for row in price_rows %}
+            <tr><td class="fw-semibold small">{{ row.type.name }}</td>
+              <td class="small">{% for c in row.cells %}{{ c.label }}: {% if c.value != '' %}{{ c.value|inr }}{% else %}<span class="text-danger">missing</span>{% endif %}{% if not forloop.last %} · {% endif %}{% endfor %}</td></tr>
+          {% endfor %}
+        </table>
+      </div>
+
+      {% if wizard %}
+        <form method="post">{% csrf_token %}
+          <button class="btn btn-success w-100 py-2" {% if not status.ok %}disabled{% endif %}>Go live</button>
+        </form>
+      {% endif %}
+    </div>
+  </div>
+{% endblock %}

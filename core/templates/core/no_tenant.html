@@ -1,0 +1,6 @@
+{% extends "auth_base.html" %}
+{% block title %}No business{% endblock %}
+{% block content %}
+  <p class="mb-3">Your account isn't linked to a turf business yet.</p>
+  <a class="btn btn-outline-secondary w-100" href="{% url 'logout_view' %}">Log out</a>
+{% endblock %}

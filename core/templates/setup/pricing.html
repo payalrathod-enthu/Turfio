@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block title %}Prices{% endblock %}
+{% block content %}
+  <h4 class="mb-3">{% if wizard %}Set up your turf{% else %}Settings — Prices{% endif %}</h4>
+  {% include "setup/_steps.html" %}
+
+  {% if rows %}
+    <div class="tif-card p-3">
+      <h5>How much do you charge?</h5>
+      <p class="small text-muted">
+        Enter the price for <strong>one hour</strong>. A 90-minute booking costs one and a half times the hourly price.
+        {% if lights_on %}A booking that runs into your lights time is split: the part under lights uses the "with lights" price and the rest uses the normal price.{% endif %}
+        Options that share a playing format share one price.
+      </p>
+      <form method="post">
+        {% csrf_token %}
+        <div class="table-responsive">
+          <table class="table table-sm align-middle" id="price-table">
+            <thead class="text-muted small"><tr><th>What customers book</th>{% for h in headers %}<th>{{ h }}</th>{% endfor %}</tr></thead>
+            <tbody>
+              {% for row in rows %}
+                <tr><td class="fw-semibold">{{ row.type.name }}</td>
+                  {% for c in row.cells %}
+                    <td style="min-width:130px">
+                      <div class="input-group input-group-sm">
+                        <span class="input-group-text">₹</span>
+                        <input type="number" min="0" step="0.01" name="{{ c.name }}" value="{{ c.value }}" class="form-control" aria-label="{{ row.type.name }} {{ c.label }}">
+                      </div>
+                    </td>
+                  {% endfor %}
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        {% if rows|length > 1 %}
+          <button type="button" id="copy-prices" class="btn btn-outline-secondary btn-sm mb-3">Use the first row's prices for every row</button>
+          <div class="form-text mb-3">A shortcut for similar grounds. You can still change each one afterwards.</div>
+        {% endif %}
+        <div><button class="btn btn-success">{% if wizard %}Save and continue{% else %}Save prices{% endif %}</button>
+        <a class="btn btn-link" href="{% url 'settings_pricing' %}">Advanced price rules</a></div>
+      </form>
+    </div>
+    <script>
+      const copyBtn = document.getElementById('copy-prices');
+      if (copyBtn) copyBtn.onclick = function () {
+        const rows = document.querySelectorAll('#price-table tbody tr');
+        const first = rows[0].querySelectorAll('input');
+        rows.forEach((r, i) => { if (i) r.querySelectorAll('input').forEach((inp, j) => { inp.value = first[j].value; }); });
+      };
+    </script>
+  {% else %}
+    <div class="tif-card p-3">Add what customers can book first. <a href="{% url 'setup_grounds' %}">Go to that step</a></div>
+  {% endif %}
+{% endblock %}

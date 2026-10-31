@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% load inr_filters %}
+{% block title %}Payments{% endblock %}
+{% block content %}
+  <h4 class="mb-3">Payments</h4>
+  <form method="get" class="tif-card p-3 mb-3 d-flex gap-2 flex-wrap">
+    <input type="hidden" name="date" value="{{ date_filter }}">
+    {% if date_filter %}<span class="small text-muted align-self-center">Date: {{ date_filter }}</span><a href="{% url 'payments' %}" class="btn btn-sm btn-outline-secondary">Clear</a>{% endif %}
+    <select name="mode" class="form-select form-select-sm w-auto" onchange="this.form.submit()">
+      <option value="">All Modes</option>
+      <option value="cash" {% if mode_filter == 'cash' %}selected{% endif %}>Cash</option>
+      <option value="online" {% if mode_filter == 'online' %}selected{% endif %}>Online</option>
+    </select>
+    <select name="type" class="form-select form-select-sm w-auto" onchange="this.form.submit()">
+      <option value="">All Types</option>
+      <option value="advance" {% if type_filter == 'advance' %}selected{% endif %}>Advance</option>
+      <option value="partial" {% if type_filter == 'partial' %}selected{% endif %}>Partial</option>
+      <option value="final" {% if type_filter == 'final' %}selected{% endif %}>Final</option>
+      <option value="refund" {% if type_filter == 'refund' %}selected{% endif %}>Refund</option>
+    </select>
+  </form>
+  <div class="tif-card p-3">
+    <table class="table table-sm">
+      <thead class="text-muted small"><tr><th>Date</th><th>Booking</th><th>Customer</th><th>Mode</th><th>Type</th><th class="text-end">Amount</th></tr></thead>
+      <tbody>
+        {% for p in payments %}
+          <tr style="cursor:pointer" onclick="window.location='{% url 'booking_detail' p.booking.id %}'">
+            <td class="small">{{ p.created_at|date:"d M Y, H:i" }}</td>
+            <td class="small fw-semibold">{{ p.booking.booking_code }}</td>
+            <td>{{ p.booking.customer.name }}</td>
+            <td>{{ p.get_payment_mode_display }}</td>
+            <td>{{ p.get_payment_type_display }}</td>
+            <td class="text-end {% if p.payment_type == 'refund' %}text-danger{% endif %}">
+              {% if p.payment_type == 'refund' %}-{% endif %}{{ p.amount|inr }}
+            </td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="6" class="text-muted small">No payments recorded yet.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% endblock %}

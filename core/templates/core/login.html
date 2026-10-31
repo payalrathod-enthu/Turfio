@@ -1,0 +1,16 @@
+{% extends "auth_base.html" %}
+{% block content %}
+  {% if form.errors %}<div class="alert alert-danger py-2 small">Invalid email/username or password.</div>{% endif %}
+  <form method="post">
+    {% csrf_token %}
+    <input type="hidden" name="next" value="{{ next }}">
+    <div class="mb-2">{{ form.username }}</div>
+    <div class="mb-3">{{ form.password }}</div>
+    <button class="btn btn-success w-100">Sign in</button>
+  </form>
+  <div class="d-flex justify-content-between small mt-3">
+    <a href="{% url 'password_reset' %}">Forgot password?</a>
+    <a href="{% url 'signup' %}">Create an account</a>
+  </div>
+  <div class="small mt-2"><a href="{% url 'resend_verification' %}">Resend verification email</a></div>
+{% endblock %}

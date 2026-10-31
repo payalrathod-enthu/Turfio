@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% load inr_filters %}
+{% block title %}Cancellations{% endblock %}
+{% block content %}
+  <h4 class="mb-1">Cancellations</h4>
+  <p class="text-muted small mb-3">Total refunded: {{ total_refunded|inr }}</p>
+  <div class="tif-card p-3">
+    <table class="table table-sm">
+      <thead class="text-muted small"><tr><th>Code</th><th>Customer</th><th>Date</th><th>Reason</th><th>Cancelled By</th><th class="text-end">Refund</th></tr></thead>
+      <tbody>
+        {% for b in cancellations %}
+          <tr style="cursor:pointer" onclick="window.location='{% url 'booking_detail' b.id %}'">
+            <td class="fw-semibold small">{{ b.booking_code }}</td>
+            <td>{{ b.customer.name }}</td>
+            <td class="small">{{ b.date|date:"d M Y" }}</td>
+            <td class="small">{{ b.cancellation_reason|truncatechars:40 }}</td>
+            <td class="small">{{ b.cancelled_by.username|default:"—" }}</td>
+            <td class="text-end">{{ b.refund_amount|inr }}</td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="6" class="text-muted small">No cancellations recorded.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% endblock %}

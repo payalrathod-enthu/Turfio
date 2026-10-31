@@ -1,0 +1,28 @@
+{% extends "public/base_public.html" %}
+{% load inr_filters %}
+{% block content %}
+  {% if biz.cover_image %}<div class="pub-hero mb-3"><img src="{{ biz.cover_image.url }}" alt="{{ biz.name }}"></div>{% endif %}
+  <h3 class="mb-1">{{ biz.name }}</h3>
+  <p class="text-muted small mb-2">
+    {% if biz.address %}<i class="bi bi-geo-alt"></i> {{ biz.address }}{% if biz.city %}, {{ biz.city }}{% endif %}{% endif %}
+    {% if biz.contact_phone %} · <i class="bi bi-telephone"></i> <a href="tel:{{ biz.contact_phone }}">{{ biz.contact_phone }}</a>{% endif %}
+  </p>
+  {% if biz.description %}<p class="small">{{ biz.description|linebreaksbr }}</p>{% endif %}
+  {% if sports %}<p class="small mb-2">{% for s in sports %}<span class="badge badge-status-muted me-1">{{ s.name }}</span>{% endfor %}</p>{% endif %}
+
+  <details class="mb-3 small">
+    <summary>Opening hours</summary>
+    <table class="table table-sm mb-0 mt-2" style="max-width: 320px;">
+      {% for d in week_rows %}
+        <tr><td>{{ d.day }}</td><td>{% if d.open %}{{ d.start|time:"g:i A" }} – {{ d.end|time:"g:i A" }}{% if d.next_day %} (next day){% endif %}{% else %}<span class="text-muted">Closed</span>{% endif %}</td></tr>
+      {% endfor %}
+    </table>
+  </details>
+
+  <form method="get" class="tif-card p-3 mb-3">
+    <h6 class="mb-3">Check availability</h6>
+    <div class="row g-2">
+      {% if form.has_sports %}
+        <div class="col-12 col-sm-6"><label class="form-label small mb-1">Sport</label>{{ form.sport }}</div>
+      {% endif %}
+      <div class="col-12 col-sm-6"><label class="form-label small mb-1">{{ form.book
