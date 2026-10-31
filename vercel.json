@@ -1,0 +1,10 @@
+
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": "django",
+  "functions": {
+    "config/wsgi.py": {
+      "includeFiles": "{templates/**,core/templates/**}"
+    }
+  }
+}
