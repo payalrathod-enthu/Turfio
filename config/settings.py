@@ -37,13 +37,14 @@ CSRF_COOKIE_SECURE = not DEBUG
 SECURE_HSTS_SECONDS = 0
 
 ALLOWED_HOSTS = [
-    "localhost",
     "127.0.0.1",
-    "turfio-34nu.onrender.com",
+    "localhost",
+    "turfio-two.vercel.app",
+    ".vercel.app",
 ]
 
 CSRF_TRUSTED_ORIGINS = [
-    "https://turfio-34nu.onrender.com",
+    "https://turfio-two.vercel.app",
 ]
 
 vercel_url = os.environ.get("VERCEL_URL")
