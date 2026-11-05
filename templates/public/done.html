@@ -1,14 +1,143 @@
+
 {% extends "public/base_public.html" %}
 {% load inr_filters %}
-{% block title %}Request received{% endblock %}
+
+{% block title %}Booking Confirmed{% endblock %}
+
 {% block content %}
-  <div class="tif-card p-4 text-center">
-    <i class="bi bi-check-circle text-success" style="font-size:2.5rem"></i>
-    <h4 class="mt-2">Request received</h4>
-    <p class="mb-1">Reference: <strong>{{ booking.booking_code }}</strong></p>
-    <p class="small text-muted mb-1">{{ booking.config.bookable_type.name }} · {{ booking.date|date:"l, d F Y" }} · {{ booking.start_time|time:"g:i A" }} – {{ booking.end_time|time:"g:i A" }}</p>
-    <p class="small text-muted">Estimated {{ booking.final_amount|inr }}</p>
-    <p class="small">Your time is held. {{ biz.name }} will confirm shortly{% if biz.contact_phone %}, or call {{ biz.contact_phone }}{% endif %}.</p>
-    <a href="{% url 'public_home' biz.slug %}" class="btn btn-outline-success btn-sm">Check another time</a>
-  </div>
+
+<div class="tif-card p-4 text-center">
+
+    <!-- Success Icon -->
+    <i class="bi bi-check-circle-fill text-success"
+       style="font-size: 3rem;"></i>
+
+    <!-- Confirmation Heading -->
+    <h3 class="mt-3 mb-2">
+        Your Slot Is Confirmed!
+    </h3>
+
+    <p class="text-muted mb-4">
+        Your turf booking has been successfully confirmed.
+        Your selected slot is now reserved.
+    </p>
+
+    <!-- Booking Reference -->
+    <div class="mb-3">
+        <p class="small text-muted mb-1">
+            Booking Reference
+        </p>
+
+        <h4 class="fw-bold">
+            {{ booking.booking_code }}
+        </h4>
+    </div>
+
+    <hr>
+
+    <!-- Booking Details -->
+    <div class="my-3">
+
+        <p class="fw-semibold mb-2">
+            {{ booking.config.bookable_type.name }}
+        </p>
+
+        {% if booking.sport %}
+        <p class="small mb-2">
+            <strong>Sport:</strong>
+            {{ booking.sport.name }}
+        </p>
+        {% endif %}
+
+        <p class="small text-muted mb-2">
+            <i class="bi bi-calendar-event"></i>
+            {{ booking.date|date:"l, d F Y" }}
+        </p>
+
+        <p class="small text-muted mb-2">
+            <i class="bi bi-clock"></i>
+            {{ booking.start_time|time:"g:i A" }}
+            –
+            {{ booking.end_time|time:"g:i A" }}
+        </p>
+
+        {% if booking.config.name %}
+        <p class="small text-muted mb-2">
+            <i class="bi bi-geo-alt"></i>
+            Ground: {{ booking.config.name }}
+        </p>
+        {% endif %}
+
+    </div>
+
+    <hr>
+
+    <!-- Booking Amount -->
+    <div class="my-3">
+
+        <p class="small text-muted mb-1">
+            Total Booking Amount
+        </p>
+
+        <h3 class="fw-bold mb-2">
+            {{ booking.final_amount|inr }}
+        </h3>
+
+        {% if booking.payment_status == "paid" %}
+        <span class="badge bg-success">
+            <i class="bi bi-check-circle"></i>
+            Payment Completed
+        </span>
+        {% elif booking.payment_status == "partial" %}
+        <span class="badge bg-warning text-dark">
+            <i class="bi bi-info-circle"></i>
+            Partially Paid
+        </span>
+        {% else %}
+        <span class="badge bg-warning text-dark">
+            <i class="bi bi-info-circle"></i>
+            Payment Pending
+        </span>
+        {% endif %}
+
+    </div>
+
+    <!-- Confirmation Message -->
+    <div class="mt-4 mb-3">
+
+        <p class="text-success fw-semibold mb-2">
+            <i class="bi bi-check-circle"></i>
+            Your booking is confirmed!
+        </p>
+
+        <p class="small text-muted mb-2">
+            No further approval from {{ biz.name }} is required.
+        </p>
+
+        {% if booking.payment_status == "unpaid" %}
+        <p class="small text-muted mb-2">
+            No online payment has been collected at this stage.
+        </p>
+        {% endif %}
+
+        {% if biz.contact_phone %}
+        <p class="small text-muted">
+            For payment or booking inquiries, contact
+            <a href="tel:{{ biz.contact_phone }}">
+                {{ biz.contact_phone }}
+            </a>.
+        </p>
+        {% endif %}
+
+    </div>
+
+    <!-- Book Another Slot -->
+    <a href="{% url 'public_home' slug=biz.slug %}"
+       class="btn btn-outline-success mt-2">
+        <i class="bi bi-calendar-plus"></i>
+        Book Another Slot
+    </a>
+
+</div>
+
 {% endblock %}
