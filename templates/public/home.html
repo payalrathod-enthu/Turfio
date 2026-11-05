@@ -6,159 +6,266 @@
 
 {% if biz.cover_image %}
 <div class="pub-hero mb-3">
-    <img
-        src="{{ biz.cover_image.url }}"
-        alt="{{ biz.name }}"
-        class="w-100"
-        style="max-height: 320px; object-fit: cover; border-radius: 12px;"
-    >
+    <img src="{{ biz.cover_image.url }}"
+         alt="{{ biz.name }}"
+         class="w-100"
+         style="max-height:320px;object-fit:cover;border-radius:12px;">
 </div>
 {% endif %}
 
+<h3 class="mb-1">{{ biz.name }}</h3>
+
+<p class="text-muted small mb-2">
+    {% if biz.address %}
+        <i class="bi bi-geo-alt"></i>
+        {{ biz.address }}
+        {% if biz.city %}, {{ biz.city }}{% endif %}
+    {% endif %}
+
+    {% if biz.contact_phone %}
+        · <i class="bi bi-telephone"></i>
+        <a href="tel:{{ biz.contact_phone }}">
+            {{ biz.contact_phone }}
+        </a>
+    {% endif %}
+</p>
+
+{% if biz.description %}
+<p class="small">{{ biz.description|linebreaksbr }}</p>
+{% endif %}
+
+{% if sports %}
 <div class="mb-3">
-    <h3 class="mb-1">{{ biz.name }}</h3>
-
-    <p class="text-muted small mb-2">
-        {% if biz.address %}
-            <i class="bi bi-geo-alt"></i>
-            {{ biz.address }}
-            {% if biz.city %}, {{ biz.city }}{% endif %}
-        {% endif %}
-
-        {% if biz.contact_phone %}
-            · <i class="bi bi-telephone"></i>
-            <a href="tel:{{ biz.contact_phone }}">
-                {{ biz.contact_phone }}
-            </a>
-        {% endif %}
-    </p>
-
-    {% if biz.description %}
-        <p class="small">{{ biz.description|linebreaksbr }}</p>
-    {% endif %}
-
-    {% if sports %}
-    <div class="mb-2">
-        {% for s in sports %}
-            <span class="badge badge-status-muted me-1">
-                {{ s.name }}
-            </span>
-        {% endfor %}
-    </div>
-    {% endif %}
+    {% for sport in sports %}
+        <span class="badge badge-status-muted me-1">
+            {{ sport.name }}
+        </span>
+    {% endfor %}
 </div>
+{% endif %}
 
 <details class="mb-3 small">
-    <summary class="fw-semibold">Opening hours</summary>
+    <summary>Opening hours</summary>
 
-    <table class="table table-sm mb-0 mt-2"
-           style="max-width: 360px;">
-        <tbody>
-            {% for d in week_rows %}
-            <tr>
-                <td>{{ d.day }}</td>
-                <td>
-                    {% if d.open %}
-                        {{ d.start|time:"g:i A" }}
-                        –
-                        {{ d.end|time:"g:i A" }}
+    <table class="table table-sm mb-0 mt-2">
+        {% for d in week_rows %}
+        <tr>
+            <td>{{ d.day }}</td>
+            <td>
+                {% if d.open %}
+                    {{ d.start|time:"g:i A" }}
+                    –
+                    {{ d.end|time:"g:i A" }}
 
-                        {% if d.next_day %}
-                            (next day)
-                        {% endif %}
-                    {% else %}
-                        <span class="text-muted">Closed</span>
+                    {% if d.next_day %}
+                        (next day)
                     {% endif %}
-                </td>
-            </tr>
-            {% empty %}
-            <tr>
-                <td colspan="2" class="text-muted">
-                    Opening hours are not available.
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
+                {% else %}
+                    Closed
+                {% endif %}
+            </td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="2">
+                Opening hours unavailable.
+            </td>
+        </tr>
+        {% endfor %}
     </table>
 </details>
 
 <div class="tif-card p-3 mb-3">
-    <h5 class="mb-3">Check availability</h5>
+
+    <h5 class="mb-3">Check Availability</h5>
 
     <form method="get">
-        {% if form %}
-            {% if form.non_field_errors %}
-                <div class="alert alert-danger">
-                    {{ form.non_field_errors }}
-                </div>
-            {% endif %}
 
-            <div class="row g-3">
-                {% for field in form.visible_fields %}
-                <div class="col-12 col-md-6">
-                    <label for="{{ field.id_for_label }}"
-                           class="form-label small fw-semibold">
-                        {{ field.label }}
-                    </label>
+        {% if form.non_field_errors %}
+        <div class="alert alert-danger">
+            {{ form.non_field_errors }}
+        </div>
+        {% endif %}
 
-                    {{ field }}
+        <div class="row g-3">
+            {% for field in form.visible_fields %}
+            <div class="col-12 col-md-6">
+                <label class="form-label small"
+                       for="{{ field.id_for_label }}">
+                    {{ field.label }}
+                </label>
 
-                    {% if field.help_text %}
-                        <div class="form-text">
-                            {{ field.help_text }}
-                        </div>
-                    {% endif %}
+                {{ field }}
 
-                    {% for error in field.errors %}
-                        <div class="text-danger small">
-                            {{ error }}
-                        </div>
-                    {% endfor %}
+                {% for error in field.errors %}
+                <div class="text-danger small">
+                    {{ error }}
                 </div>
                 {% endfor %}
             </div>
+            {% endfor %}
+        </div>
 
-            <button type="submit"
-                    class="btn btn-primary w-100 mt-3">
-                <i class="bi bi-search"></i>
-                Check Availability
-            </button>
-        {% else %}
-            <p class="text-muted">
-                The availability form is currently unavailable.
-            </p>
-        {% endif %}
+        <button type="submit"
+                class="btn btn-primary w-100 mt-3">
+            Check Available Slots
+        </button>
+
     </form>
 </div>
 
-<div class="tif-card p-3 mb-3">
-    <h5 class="mb-2">Book your turf</h5>
+{% if searched %}
 
-    <p class="text-muted small">
-        Select your preferred ground, date, and time
-        to make a booking.
+    {% if outcome and outcome.available %}
+
+    <div class="tif-card p-3 mb-3">
+
+        <h5 class="text-success">
+            <i class="bi bi-check-circle"></i>
+            Slot Available!
+        </h5>
+
+        <p class="mb-1">
+            <strong>Date:</strong>
+            {{ outcome.date|date:"d M Y" }}
+        </p>
+
+        <p class="mb-1">
+            <strong>Time:</strong>
+            {{ outcome.start|time:"g:i A" }}
+            –
+            {{ outcome.end|time:"g:i A" }}
+        </p>
+
+        <p class="mb-1">
+            <strong>Duration:</strong>
+            {{ outcome.duration_label }}
+        </p>
+
+        <p class="mb-2">
+            <strong>Ground:</strong>
+            {{ outcome.config.name }}
+        </p>
+
+        <form method="get"
+              action="{% url 'public_book' slug=biz.slug %}">
+
+            {% for field in form.hidden_fields %}
+                {{ field }}
+            {% endfor %}
+
+            {% for field in form.visible_fields %}
+                <input type="hidden"
+                       name="{{ field.html_name }}"
+                       value="{{ field.value|default_if_none:'' }}">
+            {% endfor %}
+
+            <button type="submit"
+                    class="btn btn-success w-100 mt-3">
+                Continue to Booking
+            </button>
+
+        </form>
+
+    </div>
+
+    {% elif outcome and outcome.error %}
+
+    <div class="alert alert-warning">
+        {{ outcome.error }}
+    </div>
+
+    {% elif not form.errors %}
+
+    <div class="alert alert-warning">
+        Sorry, no available ground was found
+        for the selected time.
+        Please try another slot.
+    </div>
+
+    {% endif %}
+
+{% endif %}
+
+{% if prices %}
+<div class="tif-card p-3 mb-3">
+
+    <h5 class="mb-3">Pricing</h5>
+
+    <div class="table-responsive">
+        <table class="table table-sm">
+            <thead>
+                <tr>
+                    <th>Ground</th>
+                    <th>Weekday</th>
+                    <th>Weekend</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for p in prices %}
+                <tr>
+                    <td>{{ p.type.name }}</td>
+                    <td>
+                        {% if p.weekday_base != None %}
+                            ₹{{ p.weekday_base|floatformat:0 }}/hr
+                        {% else %}
+                            —
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if p.weekend_base != None %}
+                            ₹{{ p.weekend_base|floatformat:0 }}/hr
+                        {% else %}
+                            —
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <p class="text-muted small mb-0">
+        Prices may vary depending on timing
+        and lighting requirements.
+        Final pricing is calculated during booking.
     </p>
 
-    <a href="{% url 'public_book' slug=biz.slug %}"
-       class="btn btn-primary w-100">
-        <i class="bi bi-calendar-check"></i>
-        Continue to Booking
-    </a>
 </div>
+{% endif %}
+
+{% if offerings %}
+<div class="tif-card p-3 mb-3">
+
+    <h5>Available Grounds</h5>
+
+    {% for offering in offerings %}
+    <div class="mb-2">
+        <strong>{{ offering.type.name }}</strong>
+
+        <div class="text-muted small">
+            {% for option in offering.options %}
+                {{ option }}{% if not forloop.last %}, {% endif %}
+            {% endfor %}
+        </div>
+    </div>
+    {% endfor %}
+
+</div>
+{% endif %}
 
 {% if biz.contact_phone %}
 <div class="tif-card p-3 mb-3">
-    <h6 class="mb-2">Need assistance?</h6>
 
-    <p class="small text-muted mb-2">
-        Contact the turf directly for booking inquiries.
-    </p>
+    <h6>Need Help?</h6>
 
     <a href="tel:{{ biz.contact_phone }}"
        class="btn btn-outline-primary w-100">
         <i class="bi bi-telephone"></i>
-        Call {{ biz.contact_phone }}
+        Contact Turf
     </a>
+
 </div>
 {% endif %}
 
