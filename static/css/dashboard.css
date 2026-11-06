@@ -1,0 +1,243 @@
+
+/* =========================================
+   DASHBOARD ONLY
+   Does not affect the other pages
+   ========================================= */
+
+.dash-page {
+    max-width: 1500px;
+    margin: 0 auto;
+}
+
+/* Page heading */
+
+.dash-title {
+    font-weight: 750;
+    letter-spacing: -0.035em;
+    color: #0f172a;
+}
+
+/* Main statistic cards */
+
+.dash-kpi {
+    transition:
+        transform 0.15s ease,
+        box-shadow 0.15s ease;
+}
+
+.dash-kpi:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 7px 18px rgba(15, 23, 42, 0.07);
+}
+
+.dash-kpi-icon {
+    color: #15803d;
+    font-size: 1.1rem;
+}
+
+.dash-kpi-value {
+    color: #0f172a;
+    font-size: clamp(1.35rem, 2vw, 1.8rem);
+    font-weight: 750;
+    letter-spacing: -0.03em;
+}
+
+/* Expandable statistics */
+
+.dash-more summary {
+    cursor: pointer;
+    list-style-position: inside;
+}
+
+.dash-secondary {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.65rem;
+}
+
+/* Section headings */
+
+.dash-section-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 0.9rem;
+}
+
+.dash-section-heading h6 {
+    font-weight: 700;
+    margin: 0;
+}
+
+.dash-section-heading a {
+    font-size: 0.8rem;
+    color: #15803d;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.dash-section-heading a:hover {
+    text-decoration: underline;
+}
+
+/* Booking rows */
+
+.dash-booking-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.85rem 0.15rem;
+    border-top: 1px solid #edf1f5;
+    min-width: 0;
+}
+
+.dash-booking-row:hover {
+    background: #f8fafc;
+}
+
+/* Booking time */
+
+.dash-time {
+    color: #64748b;
+    font-size: 0.76rem;
+    width: 76px;
+    flex-shrink: 0;
+}
+
+.dash-time small {
+    display: block;
+}
+
+/* Sport-specific icons */
+
+.dash-sport {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+
+    background: #f0fdf4;
+    border-radius: 0.65rem;
+
+    width: 38px;
+    height: 38px;
+
+    font-size: 1.35rem;
+}
+
+/* Customer and booking details */
+
+.dash-booking-info {
+    display: block;
+    flex: 1;
+    min-width: 0;
+    font-size: 0.87rem;
+}
+
+.dash-booking-info strong {
+    display: block;
+    overflow-wrap: anywhere;
+}
+
+.dash-booking-info small {
+    display: block;
+    color: #64748b;
+    overflow-wrap: anywhere;
+}
+
+/* Booking amount */
+
+.dash-amount {
+    font-weight: 700;
+    font-size: 0.85rem;
+    white-space: nowrap;
+}
+
+/* Payment and expense rows */
+
+.dash-line {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+
+    padding: 0.7rem 0.15rem;
+    border-top: 1px solid #edf1f5;
+
+    font-size: 0.85rem;
+}
+
+.dash-line:hover {
+    background: #f8fafc;
+}
+
+/* Empty state */
+
+.dash-empty {
+    text-align: center;
+    background: #f8fafc;
+    border-radius: 0.75rem;
+    padding: 1.5rem;
+    color: #64748b;
+    font-size: 0.86rem;
+}
+
+.dash-empty i {
+    display: block;
+    font-size: 1.7rem;
+    color: #94a3b8;
+    margin-bottom: 0.5rem;
+}
+
+/* Quick action buttons */
+
+.dash-action {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+
+    border: 1px solid #e2e8f0;
+    border-radius: 0.7rem;
+    padding: 0.8rem;
+
+    text-decoration: none;
+    color: #334155;
+    font-size: 0.83rem;
+    height: 100%;
+}
+
+.dash-action i {
+    font-size: 1.15rem;
+    color: #15803d;
+}
+
+.dash-action:hover {
+    background: #f0fdf4;
+    border-color: #86efac;
+    color: #166534;
+}
+
+/* Mobile responsiveness */
+
+@media (max-width: 575px) {
+
+    .dash-booking-row {
+        gap: 0.45rem;
+    }
+
+    .dash-time {
+        width: 55px;
+        font-size: 0.68rem;
+    }
+
+    .dash-sport {
+        width: 30px;
+        height: 30px;
+        font-size: 1.05rem;
+    }
+
+    .dash-amount {
+        font-size: 0.75rem;
+    }
+}

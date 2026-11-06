@@ -1,124 +1,603 @@
+
 {% extends "base.html" %}
 {% load inr_filters static %}
-{% block title %}Dashboard{% endblock %}
-{% block content %}
-  {% if tenant.cover_image %}
-    <div class="ground-hero-wrap mb-4">
-      <img src="{{ tenant.cover_image.url }}" alt="{{ tenant.name }}" class="ground-hero">
-      <div class="ground-hero-caption"><h4 class="mb-0">{{ tenant.name }}</h4><div class="small">{{ today|date:"l, d F Y" }}</div></div>
-    </div>
-  {% else %}
-    <h4 class="mb-0">{{ tenant.name }}</h4>
-    <p class="text-muted small mb-4">{{ today|date:"l, d F Y" }}</p>
-  {% endif %}
 
-  <div class="row g-3 mb-4">
-    {% for card in kpi_cards %}
-      <div class="col-6 col-md-3">
-        <a href="{{ card.url }}" class="text-decoration-none text-reset d-block">
-          <div class="tif-card p-3 kpi-link h-100">
-            <div class="text-muted small">{{ card.label }}</div>
-            <div class="fs-4 fw-bold">{% if card.is_currency %}{{ card.value|inr }}{% else %}{{ card.value }}{% endif %}</div>
-          </div>
-        </a>
-      </div>
-    {% endfor %}
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+
+<link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+
+<div class="dash-page">
+
+  <!-- Dashboard heading -->
+  <div class="d-flex flex-wrap justify-content-between
+              align-items-center gap-3 mb-4">
+
+    <div>
+      <h3 class="dash-title mb-1">Dashboard</h3>
+
+      <p class="text-muted mb-0 small">
+        {{ tenant.name }} · {{ today|date:"l, d F Y" }}
+      </p>
+    </div>
+
+    {% if can_ops %}
+    <a href="{% url 'booking_create' %}"
+       class="btn btn-success">
+      <i class="bi bi-plus-lg me-1"></i>
+      New Booking
+    </a>
+    {% endif %}
+
   </div>
 
-  <div class="row g-3">
-    <div class="col-12 col-lg-7">
-      {% if can_ops %}
-        {% if pending_requests %}
-          <div class="tif-card p-3 mb-3 border-warning">
-            <div class="d-flex justify-content-between mb-2">
-              <h6 class="mb-0">Customer requests waiting for you</h6>
-              <a class="small" href="{% url 'bookings' %}?status=pending">View all</a>
+
+  <!-- Four main statistics -->
+  <div class="row g-3 mb-3">
+
+    {% for card in kpi_cards %}
+
+      {% if card.label == "Today's Revenue" or card.label == "Today's Bookings" or card.label == "Pending Payments" or card.label == "Upcoming Bookings" %}
+
+      <div class="col-6 col-xl-3">
+
+        <a href="{{ card.url }}"
+           class="text-decoration-none text-reset d-block h-100">
+
+          <div class="tif-card dash-kpi h-100 p-3">
+
+            <div class="d-flex justify-content-between
+                        align-items-center">
+
+              <span class="small text-muted">
+                {{ card.label }}
+              </span>
+
+              <i class="bi dash-kpi-icon
+                {% if card.label == "Today's Revenue" %}
+                  bi-currency-rupee
+                {% elif card.label == "Today's Bookings" %}
+                  bi-calendar-check
+                {% elif card.label == "Pending Payments" %}
+                  bi-wallet2
+                {% else %}
+                  bi-calendar-event
+                {% endif %}">
+              </i>
+
             </div>
-            <ul class="list-unstyled mb-0">
-              {% for b in pending_requests %}
-                <li class="d-flex justify-content-between border-bottom py-2 small" style="cursor:pointer"
-                    onclick="window.location='{% url 'booking_detail' b.id %}'">
-                  <span>{{ b.date|date:"d M" }} · {{ b.start_time|time:"H:i" }} — {{ b.customer.name }} ({{ b.config.name }})</span>
-                  <span class="fw-semibold">{{ b.final_amount|inr }}</span>
-                </li>
-              {% endfor %}
-            </ul>
+
+            <div class="dash-kpi-value mt-2">
+              {% if card.is_currency %}
+                {{ card.value|inr }}
+              {% else %}
+                {{ card.value }}
+              {% endif %}
+            </div>
+
           </div>
+
+        </a>
+
+      </div>
+
+      {% endif %}
+
+    {% endfor %}
+
+  </div>
+
+
+  <!-- Expandable additional statistics -->
+  <details class="tif-card dash-more mb-4">
+
+    <summary class="px-3 py-3 fw-semibold small">
+      More statistics
+
+      <span class="text-muted fw-normal ms-1">
+        (cash, online, occupancy, expenses and more)
+      </span>
+    </summary>
+
+    <div class="px-3 pb-3">
+
+      <div class="row g-3">
+
+        {% for card in kpi_cards %}
+
+          {% if card.label != "Today's Revenue" and card.label != "Today's Bookings" and card.label != "Pending Payments" and card.label != "Upcoming Bookings" %}
+
+          <div class="col-6 col-lg-4 col-xl-3">
+
+            <a href="{{ card.url }}"
+               class="text-decoration-none text-reset d-block h-100">
+
+              <div class="dash-secondary p-3 h-100">
+
+                <div class="small text-muted">
+                  {{ card.label }}
+                </div>
+
+                <div class="fw-bold fs-5 mt-1">
+                  {% if card.is_currency %}
+                    {{ card.value|inr }}
+                  {% else %}
+                    {{ card.value }}
+                  {% endif %}
+                </div>
+
+              </div>
+
+            </a>
+
+          </div>
+
+          {% endif %}
+
+        {% endfor %}
+
+      </div>
+
+    </div>
+
+  </details>
+
+
+  <!-- Main dashboard content -->
+  <div class="row g-3">
+
+    <!-- Left column -->
+    <div class="col-12 col-xl-7">
+
+      {% if can_ops %}
+
+      <!-- Pending booking requests -->
+      {% if pending_requests %}
+
+      <section class="tif-card p-3 mb-3 border-warning">
+
+        <div class="dash-section-heading">
+
+          <h6>Customer Requests Waiting</h6>
+
+          <a href="{% url 'bookings' %}?status=pending">
+            View all
+          </a>
+
+        </div>
+
+        {% for b in pending_requests %}
+
+        <a class="dash-line text-reset text-decoration-none"
+           href="{% url 'booking_detail' b.id %}">
+
+          <span>
+            {{ b.date|date:"d M" }}
+            · {{ b.customer.name }}
+            · {{ b.config.name }}
+          </span>
+
+          <strong>{{ b.final_amount|inr }}</strong>
+
+        </a>
+
+        {% endfor %}
+
+      </section>
+
+      {% endif %}
+
+
+      <!-- Today's schedule -->
+      <section class="tif-card p-3 mb-3">
+
+        <div class="dash-section-heading">
+
+          <h6>
+            <i class="bi bi-calendar3 me-2 text-success"></i>
+            Today's Schedule
+          </h6>
+
+          <a href="{% url 'calendar_view' %}">
+            View calendar
+          </a>
+
+        </div>
+
+        {% if todays_schedule %}
+
+          {% for b in todays_schedule %}
+
+          <a class="dash-booking-row text-reset text-decoration-none"
+             href="{% url 'booking_detail' b.id %}">
+
+            <span class="dash-time">
+              {{ b.start_time|time:"g:i A" }}
+            </span>
+
+            <!-- Sport-specific symbol -->
+            <span class="dash-sport"
+                  aria-label="{{ b.sport.name|default:'Sport' }}">
+
+              {% with name=b.sport.name|lower %}
+
+                {% if 'football' in name or 'soccer' in name %}
+                  ⚽
+                {% elif 'cricket' in name %}
+                  🏏
+                {% elif 'badminton' in name %}
+                  🏸
+                {% elif 'basketball' in name %}
+                  🏀
+                {% elif 'table tennis' in name or 'ping pong' in name %}
+                  🏓
+                {% elif 'tennis' in name %}
+                  🎾
+                {% elif 'volleyball' in name %}
+                  🏐
+                {% elif 'hockey' in name %}
+                  🏑
+                {% elif 'baseball' in name %}
+                  ⚾
+                {% elif 'rugby' in name %}
+                  🏉
+                {% elif 'golf' in name %}
+                  ⛳
+                {% elif 'swim' in name %}
+                  🏊
+                {% elif 'kabaddi' in name %}
+                  🤼
+                {% else %}
+                  🏟️
+                {% endif %}
+
+              {% endwith %}
+
+            </span>
+
+            <span class="dash-booking-info">
+
+              <strong>{{ b.customer.name }}</strong>
+
+              <small>
+                {{ b.config.name }}
+
+                {% if b.sport %}
+                  · {{ b.sport.name }}
+                {% endif %}
+              </small>
+
+            </span>
+
+            <span class="dash-amount">
+              {{ b.final_amount|inr }}
+            </span>
+
+          </a>
+
+          {% endfor %}
+
+        {% else %}
+
+        <div class="dash-empty">
+
+          <i class="bi bi-calendar-check"></i>
+
+          <p class="mb-0">
+            No bookings scheduled for today.
+          </p>
+
+        </div>
+
         {% endif %}
 
-        <div class="tif-card p-3">
-          <div class="d-flex justify-content-between mb-3"><h6 class="mb-0">Today's Schedule</h6><a class="small" href="{% url 'calendar_view' %}">Open calendar</a></div>
-          {% if todays_schedule %}
-            <div class="table-responsive">
-              <table class="table table-sm align-middle mb-0">
-                <thead class="text-muted small"><tr><th>Time</th><th>Customer</th><th>Ground</th><th>Amount</th><th>Status</th></tr></thead>
-                <tbody>
-                  {% for b in todays_schedule %}
-                    <tr style="cursor:pointer" onclick="window.location='{% url 'booking_detail' b.id %}'">
-                      <td class="small">{{ b.start_time|time:"H:i" }} – {{ b.end_time|time:"H:i" }}</td>
-                      <td>{{ b.customer.name }}</td>
-                      <td>{{ b.config.name }}</td>
-                      <td>{{ b.final_amount|inr }}</td>
-                      <td>
-                        {% if b.payment_status == 'paid' %}<span class="badge badge-status-green">PAID</span>
-                        {% elif b.payment_status == 'advance_paid' %}<span class="badge badge-status-amber">ADVANCE</span>
-                        {% elif b.payment_status == 'partially_paid' %}<span class="badge badge-status-amber">PARTIAL</span>
-                        {% elif b.payment_status == 'unpaid' %}<span class="badge badge-status-red">UNPAID</span>
-                        {% else %}<span class="badge badge-status-muted">{{ b.get_payment_status_display }}</span>{% endif %}
-                      </td>
-                    </tr>
-                  {% endfor %}
-                </tbody>
-              </table>
-            </div>
-          {% else %}
-            <p class="text-muted small mb-0">No bookings scheduled for today.</p>
-          {% endif %}
+      </section>
+
+
+      <!-- Upcoming bookings -->
+      <section class="tif-card p-3 mb-3">
+
+        <div class="dash-section-heading">
+
+          <h6>
+            <i class="bi bi-calendar-event me-2 text-success"></i>
+            Upcoming Bookings
+          </h6>
+
+          <a href="{% url 'bookings' %}?upcoming=1">
+            View all
+          </a>
+
         </div>
 
-        <div class="tif-card p-3 mt-3">
-          <div class="d-flex justify-content-between mb-3"><h6 class="mb-0">Upcoming Bookings</h6><a class="small" href="{% url 'bookings' %}?upcoming=1">View all</a></div>
-          {% if upcoming_bookings %}
-            <ul class="list-unstyled mb-0">
-              {% for b in upcoming_bookings %}
-                <li class="d-flex justify-content-between border-bottom py-2 small" style="cursor:pointer" onclick="window.location='{% url 'booking_detail' b.id %}'">
-                  <span>{{ b.date|date:"d M" }} · {{ b.start_time|time:"H:i" }} — {{ b.customer.name }} ({{ b.config.name }})</span>
-                  <span class="fw-semibold">{{ b.final_amount|inr }}</span>
-                </li>
-              {% endfor %}
-            </ul>
-          {% else %}<p class="text-muted small mb-0">No upcoming confirmed bookings.</p>{% endif %}
-        </div>
+        {% if upcoming_bookings %}
+
+          {% for b in upcoming_bookings %}
+
+          <a class="dash-booking-row text-reset text-decoration-none"
+             href="{% url 'booking_detail' b.id %}">
+
+            <span class="dash-time">
+
+              {{ b.date|date:"d M" }}
+
+              <small>
+                {{ b.start_time|time:"g:i A" }}
+              </small>
+
+            </span>
+
+            <!-- Sport-specific symbol -->
+            <span class="dash-sport"
+                  aria-label="{{ b.sport.name|default:'Sport' }}">
+
+              {% with name=b.sport.name|lower %}
+
+                {% if 'football' in name or 'soccer' in name %}
+                  ⚽
+                {% elif 'cricket' in name %}
+                  🏏
+                {% elif 'badminton' in name %}
+                  🏸
+                {% elif 'basketball' in name %}
+                  🏀
+                {% elif 'table tennis' in name or 'ping pong' in name %}
+                  🏓
+                {% elif 'tennis' in name %}
+                  🎾
+                {% elif 'volleyball' in name %}
+                  🏐
+                {% elif 'hockey' in name %}
+                  🏑
+                {% elif 'baseball' in name %}
+                  ⚾
+                {% elif 'rugby' in name %}
+                  🏉
+                {% elif 'golf' in name %}
+                  ⛳
+                {% elif 'swim' in name %}
+                  🏊
+                {% elif 'kabaddi' in name %}
+                  🤼
+                {% else %}
+                  🏟️
+                {% endif %}
+
+              {% endwith %}
+
+            </span>
+
+            <span class="dash-booking-info">
+
+              <strong>{{ b.customer.name }}</strong>
+
+              <small>
+
+                {{ b.config.name }}
+
+                {% if b.sport %}
+                  · {{ b.sport.name }}
+                {% endif %}
+
+              </small>
+
+            </span>
+
+            <span class="dash-amount">
+              {{ b.final_amount|inr }}
+            </span>
+
+          </a>
+
+          {% endfor %}
+
+        {% else %}
+
+          <p class="text-muted small mb-0">
+            No upcoming confirmed bookings.
+          </p>
+
+        {% endif %}
+
+      </section>
+
       {% endif %}
+
     </div>
 
-    <div class="col-12 col-lg-5">
-      <div class="tif-card p-3">
-        <div class="d-flex justify-content-between mb-3"><h6 class="mb-0">Pending Payments</h6><a class="small" href="{% url 'bookings' %}?pending=1">View all</a></div>
+
+    <!-- Right column -->
+    <div class="col-12 col-xl-5">
+
+      <!-- Pending payments -->
+      <section class="tif-card p-3 mb-3">
+
+        <div class="dash-section-heading">
+
+          <h6>
+            <i class="bi bi-wallet2 me-2 text-success"></i>
+            Pending Payments
+          </h6>
+
+          <a href="{% url 'bookings' %}?pending=1">
+            View all
+          </a>
+
+        </div>
+
         {% if pending_payments_list %}
-          <ul class="list-unstyled mb-0">
-            {% for b in pending_payments_list %}
-              <li class="d-flex justify-content-between border-bottom py-2 small" style="cursor:pointer" onclick="window.location='{% url 'booking_detail' b.id %}'">
-                <span>{{ b.customer.name }} · {{ b.date|date:"d M" }}</span>
-                <span class="fw-semibold text-danger">{{ b.balance|inr }}</span>
-              </li>
-            {% endfor %}
-          </ul>
-        {% else %}<p class="text-muted small mb-0">No pending payments.</p>{% endif %}
-      </div>
 
-      {% if can_finance %}
-        <div class="tif-card p-3 mt-3">
-          <div class="d-flex justify-content-between mb-3"><h6 class="mb-0">Recent Expenses</h6><a class="small" href="{% url 'expenses' %}">View all</a></div>
-          {% if recent_expenses %}
-            <ul class="list-unstyled mb-0">
-              {% for e in recent_expenses %}
-                <li class="d-flex justify-content-between border-bottom py-2 small"><span>{{ e.date|date:"d M" }} · {{ e.category }}</span><span class="fw-semibold">{{ e.amount|inr }}</span></li>
-              {% endfor %}
-            </ul>
-          {% else %}<p class="text-muted small mb-0">No expenses recorded yet.</p>{% endif %}
+          {% for b in pending_payments_list %}
+
+          <a class="dash-line text-reset text-decoration-none"
+             href="{% url 'booking_detail' b.id %}">
+
+            <span>
+
+              <strong>{{ b.customer.name }}</strong>
+
+              <small class="d-block text-muted">
+                {{ b.date|date:"d M" }}
+                · {{ b.booking_code }}
+              </small>
+
+            </span>
+
+            <strong class="text-danger">
+              {{ b.balance|inr }}
+            </strong>
+
+          </a>
+
+          {% endfor %}
+
+        {% else %}
+
+          <p class="text-muted small mb-0">
+            No pending payments.
+          </p>
+
+        {% endif %}
+
+      </section>
+
+
+      <!-- Quick actions -->
+      <section class="tif-card p-3 mb-3">
+
+        <div class="dash-section-heading">
+
+          <h6>
+            <i class="bi bi-lightning-charge me-2 text-success"></i>
+            Quick Actions
+          </h6>
+
         </div>
+
+        <div class="row g-2">
+
+          {% if can_ops %}
+
+          <div class="col-6">
+
+            <a class="dash-action"
+               href="{% url 'booking_create' %}">
+
+              <i class="bi bi-calendar-plus"></i>
+              <span>New Booking</span>
+
+            </a>
+
+          </div>
+
+          <div class="col-6">
+
+            <a class="dash-action"
+               href="{% url 'availability' %}">
+
+              <i class="bi bi-clock-history"></i>
+              <span>Check Availability</span>
+
+            </a>
+
+          </div>
+
+          <div class="col-6">
+
+            <a class="dash-action"
+               href="{% url 'tournaments' %}">
+
+              <i class="bi bi-trophy"></i>
+              <span>Tournaments</span>
+
+            </a>
+
+          </div>
+
+          {% endif %}
+
+          <div class="col-6">
+
+            <a class="dash-action"
+               href="{% url 'payments' %}">
+
+              <i class="bi bi-cash-coin"></i>
+              <span>Payments</span>
+
+            </a>
+
+          </div>
+
+          {% if can_finance %}
+
+          <div class="col-6">
+
+            <a class="dash-action"
+               href="{% url 'expenses' %}">
+
+              <i class="bi bi-receipt"></i>
+              <span>Expenses</span>
+
+            </a>
+
+          </div>
+
+          {% endif %}
+
+        </div>
+
+      </section>
+
+
+      <!-- Recent expenses -->
+      {% if can_finance %}
+
+      <section class="tif-card p-3 mb-3">
+
+        <div class="dash-section-heading">
+
+          <h6>Recent Expenses</h6>
+
+          <a href="{% url 'expenses' %}">
+            View all
+          </a>
+
+        </div>
+
+        {% if recent_expenses %}
+
+          {% for e in recent_expenses %}
+
+          <div class="dash-line">
+
+            <span>
+              {{ e.date|date:"d M" }}
+              · {{ e.category }}
+            </span>
+
+            <strong>{{ e.amount|inr }}</strong>
+
+          </div>
+
+          {% endfor %}
+
+        {% else %}
+
+          <p class="text-muted small mb-0">
+            No expenses recorded yet.
+          </p>
+
+        {% endif %}
+
+      </section>
+
       {% endif %}
+
     </div>
+
   </div>
+
+</div>
+
 {% endblock %}

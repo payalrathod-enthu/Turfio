@@ -110,12 +110,24 @@ def dashboard(request):
         "active": "dashboard",
         "today": today,
         "kpi_cards": kpi_cards,
-        "todays_schedule": todays_bookings_qs.select_related('customer', 'config__bookable_type').order_by('start_time'),
-        "upcoming_bookings": Booking.objects.filter(date__gt=today, booking_status='confirmed')
-            .select_related('customer', 'config__bookable_type').order_by('date', 'start_time')[:5],
+        "todays_schedule": todays_bookings_qs.select_related(
+            'customer',
+            'config__bookable_type',
+            'sport'
+        ).order_by('start_time'),
+        "upcoming_bookings": Booking.objects.filter(
+            date__gt=today,
+            booking_status='confirmed'
+        ).select_related(
+            'customer',
+            'config__bookable_type',
+            'sport'
+        ).order_by('date', 'start_time')[:5],
+
         "pending_requests": requests_qs.select_related('customer', 'config').order_by('date', 'start_time')[:5],
         "pending_payments_list": sorted(pending_qs, key=lambda b: (b.date, b.start_time))[:5],
         "recent_expenses": Expense.objects.order_by('-created_at')[:5] if role in FINANCE else [],
+        
     })
 
 
