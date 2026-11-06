@@ -1,0 +1,137 @@
+
+{% load inr_filters %}
+
+{% for e in errors %}
+  <div class="alert alert-danger small py-2">
+    <i class="bi bi-exclamation-circle me-1"></i>
+    {{ e }}
+  </div>
+{% endfor %}
+
+{% if r.final_amount != None %}
+
+  <!-- Original amount -->
+  <div class="d-flex justify-content-between border-bottom py-2">
+    <span class="text-muted">
+      Original Amount
+    </span>
+
+    <strong>
+      {{ booking.final_amount|inr }}
+    </strong>
+  </div>
+
+  <!-- New base amount -->
+  <div class="d-flex justify-content-between border-bottom py-2">
+    <span class="text-muted">
+      New Base Amount
+    </span>
+
+    <strong>
+      {{ r.base_amount|inr }}
+    </strong>
+  </div>
+
+  <!-- Discount -->
+  <div class="d-flex justify-content-between border-bottom py-2">
+    <span class="text-muted">
+      Discount
+    </span>
+
+    <strong class="text-danger">
+      −{{ r.discount_amount|inr }}
+    </strong>
+  </div>
+
+  <!-- Additional charges -->
+  <div class="d-flex justify-content-between border-bottom py-2">
+    <span class="text-muted">
+      Additional Charges
+    </span>
+
+    <strong>
+      +{{ r.additional_amount|inr }}
+    </strong>
+  </div>
+
+  <!-- Revised total -->
+  <div class="d-flex justify-content-between align-items-center py-3">
+    <span class="fw-semibold">
+      Revised Total
+    </span>
+
+    <strong class="fs-4 text-success">
+      {{ r.final_amount|inr }}
+    </strong>
+  </div>
+
+  <!-- Existing payments -->
+  <div class="d-flex justify-content-between border-top py-2">
+    <span>
+      Already Received
+    </span>
+
+    <strong>
+      {{ booking.total_received|inr }}
+    </strong>
+  </div>
+
+  <!-- Balance -->
+  {% if r.balance < 0 %}
+
+    <div class="alert alert-warning small mt-2 mb-0">
+      <i class="bi bi-exclamation-triangle me-1"></i>
+
+      <strong>Overpayment / Potential Refund</strong>
+
+      <p class="mb-0 mt-1">
+        The revised booking amount is lower than the
+        amount already received.
+
+        Existing payments are preserved.
+        Any refund must be handled separately.
+      </p>
+    </div>
+
+  {% else %}
+
+    <div class="d-flex justify-content-between py-2">
+      <span>
+        Remaining Balance
+      </span>
+
+      <strong>
+        {{ r.balance|inr }}
+      </strong>
+    </div>
+
+  {% endif %}
+
+  <!-- Duration and lighting information -->
+  {% if r.duration_label %}
+    <p class="text-muted small mt-2 mb-0">
+      <i class="bi bi-clock me-1"></i>
+      Duration: {{ r.duration_label }}
+
+      · {{ r.day_type|title }}
+
+      · {% if r.lights_required %}
+          Lights Included
+        {% else %}
+          No Lights
+        {% endif %}
+    </p>
+  {% endif %}
+
+{% else %}
+
+  <div class="text-center py-4">
+    <i class="bi bi-calculator text-success fs-3"></i>
+
+    <p class="text-muted small mt-2 mb-0">
+      Choose a valid ground, date, and time
+      to calculate the revised booking amount.
+    </p>
+  </div>
+
+{% endif %}

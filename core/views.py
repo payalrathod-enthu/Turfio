@@ -21,7 +21,7 @@ from .models import Sport
 from . import services
 from .forms import BookingForm, ExpenseForm, PricingRuleForm, TournamentForm
 from .models import (BookableConfig, Booking, BookingAdditionalCharge, BookingDiscount,
-                     BookingPayment, Customer, Expense, PricingRule, Resource,
+                     BookingPayment, Customer, Expense, PricingRule, Resource, AuditLog,
                      Tournament, TournamentGround)
 from .roles import ALL_ROLES, FINANCE, MANAGE, OPS
 from .tenancy import require_roles, tenant_view
@@ -140,32 +140,59 @@ def dashboard(request):
 def bookings(request):
     status_filter = request.GET.get('status', '')
     date_filter = request.GET.get('date', '')
+    search = request.GET.get('q', '').strip()
+    sport_filter = request.GET.get('sport', '')
+    config_filter = request.GET.get('config', '')
+    tab = request.GET.get('tab', 'all')
     pending = request.GET.get('pending') == '1'
     upcoming = request.GET.get('upcoming') == '1'
-
-    qs = Booking.objects.select_related('customer', 'config__bookable_type').order_by('-date', '-start_time')
+    today = timezone.localdate()
+    base = Booking.objects.all()
+    counts = {
+        'total': base.count(),
+        'confirmed': base.filter(booking_status='confirmed').count(),
+        'pending': base.filter(booking_status='pending').count(),
+        'cancelled': base.filter(booking_status='cancelled').count(),
+    }
+    qs = base.select_related('customer', 'config__bookable_type', 'sport').order_by('-date', '-start_time')
+    if search:
+        qs = qs.filter(Q(booking_code__icontains=search) | Q(customer__name__icontains=search) |
+                       Q(customer__phone__icontains=search))
     if status_filter:
         qs = qs.filter(booking_status=status_filter)
+    if sport_filter:
+        qs = qs.filter(sport_id=sport_filter)
+    if config_filter:
+        qs = qs.filter(config_id=config_filter)
     if date_filter:
         try:
-            qs = qs.filter(date=dt.strptime(date_filter, "%Y-%m-%d").date())
+            qs = qs.filter(date=dt.strptime(date_filter, '%Y-%m-%d').date())
         except ValueError:
             date_filter = ''
-    if upcoming:
-        qs = qs.filter(date__gt=date.today(), booking_status='confirmed').order_by('date', 'start_time')
+    if tab == 'upcoming' or upcoming:
+        qs = qs.filter(date__gte=today, booking_status='confirmed').order_by('date', 'start_time')
+    elif tab == 'completed':
+        qs = qs.filter(booking_status='completed')
+    elif tab == 'cancelled':
+        qs = qs.filter(booking_status='cancelled')
     if pending:
         qs = qs.exclude(booking_status='cancelled')
         qs = qs.filter(id__in=[b.id for b in qs if b.balance > 0])
-
-    return render(request, "core/bookings.html", {
-        "active": "bookings", "bookings": qs[:100],
-        "status_filter": status_filter, "date_filter": date_filter,
-        "pending": pending, "upcoming": upcoming,
-        "status_choices": Booking.BOOKING_STATUS_CHOICES,
+    from django.core.paginator import Paginator
+    page = Paginator(qs, 15).get_page(request.GET.get('page'))
+    return render(request, 'core/bookings.html', {
+        'active': 'bookings', 'bookings': page, 'page_obj': page,
+        'counts': counts, 'search': search, 'tab': tab,
+        'status_filter': status_filter, 'date_filter': date_filter,
+        'sport_filter': sport_filter, 'config_filter': config_filter,
+        'sports': Sport.objects.filter(is_active=True).order_by('name'),
+        'configs': BookableConfig.objects.filter(is_active=True).order_by('name'),
+        'pending': pending, 'upcoming': upcoming,
+        'status_choices': Booking.BOOKING_STATUS_CHOICES,
     })
 
 
-def _compute_preview(tenant, get_params):
+def _compute_preview(tenant, get_params, exclude_booking_id=None, received_override=None):
     """One calculation shared by the live preview and the final save."""
     errors = []
     result = {
@@ -245,16 +272,20 @@ def _compute_preview(tenant, get_params):
     cash_paid = _dec(get_params.get('cash_paid'))
     online_paid = _dec(get_params.get('online_paid'))
     result["cash_paid"], result["online_paid"] = cash_paid, online_paid
-    try:
-        total_received = services.validate_payment_split(final_amount, cash_paid, online_paid)
-    except services.ValidationError as e:
-        errors.append(str(e))
-        total_received = cash_paid + online_paid
+    if received_override is not None:
+        total_received = received_override
+    else:
+        try:
+            total_received = services.validate_payment_split(final_amount, cash_paid, online_paid)
+        except services.ValidationError as e:
+            errors.append(str(e))
+            total_received = cash_paid + online_paid
     result["total_received"] = total_received
     result["balance"] = final_amount - total_received
 
     try:
-        conflict = services.find_conflicting_booking(tenant, config, booking_date, start_time, end_time)
+        conflict = services.find_conflicting_booking(tenant, config, booking_date, start_time, end_time,
+                                                     exclude_booking_id=exclude_booking_id)
     except services.ValidationError as e:
         errors.append(str(e))
         conflict = None
@@ -370,6 +401,7 @@ def booking_create(request):
         form = BookingForm(initial=initial, tenant=tenant)
 
         tenant_settings = services.get_settings(tenant)
+    tenant_settings = services.get_settings(tenant)
     configs = list(BookableConfig._base_manager.filter(tenant=tenant, is_active=True))
     allowed = {}
     for config_id, sport_id in BookableConfig.sports.through.objects.filter(
@@ -386,6 +418,154 @@ def booking_create(request):
             str(c.id): allowed.get(str(c.id), []) for c in configs
         },
     })
+
+
+def _edit_initial(booking):
+    discount = booking.discounts.order_by('-created_at').first()
+    charge = booking.additional_charges.order_by('-created_at').first()
+    return {
+        'customer_name': booking.customer.name,
+        'customer_phone': booking.customer.phone,
+        'sport': booking.sport_id,
+        'config': booking.config_id,
+        'date': booking.date.isoformat(),
+        'start_time': booking.start_time.strftime('%H:%M'),
+        'end_time': booking.end_time.strftime('%H:%M'),
+        'booking_type': booking.booking_type,
+        'discount_type': discount.discount_type if discount else 'none',
+        'discount_value': discount.discount_value if discount else 0,
+        'additional_charge_desc': charge.description if charge else '',
+        'additional_charge_amount': booking.additional_charges_amount,
+        'notes': booking.notes,
+    }
+
+
+def _edit_price(tenant, data, booking):
+    # Reuse the same pricing engine as New Booking. Existing payments are immutable.
+    params = data.copy()
+    params['cash_paid'] = '0'
+    params['online_paid'] = '0'
+    return _compute_preview(tenant, params, exclude_booking_id=booking.id,
+                            received_override=booking.total_received)
+
+
+@tenant_view
+@require_roles(*OPS)
+def booking_edit_preview(request, booking_id):
+    booking = get_object_or_404(Booking, pk=booking_id)
+    if booking.booking_status in ('cancelled', 'completed'):
+        return HttpResponse('This booking can no longer be edited.', status=400)
+    result, errors = _edit_price(request.tenant, request.GET, booking)
+    return render(request, 'core/partials/edit_price_summary.html', {
+        'r': result, 'errors': errors, 'booking': booking,
+    })
+
+
+@tenant_view
+@require_roles(*OPS)
+def booking_edit(request, booking_id):
+    tenant = request.tenant
+    booking = get_object_or_404(Booking.objects.select_related('customer'), pk=booking_id)
+    if booking.booking_status in ('cancelled', 'completed'):
+        messages.error(request, 'Cancelled or completed bookings cannot be edited.')
+        return redirect('booking_detail', booking_id=booking.id)
+
+    if request.method == 'POST':
+        # Payments cannot be altered through Edit Booking; use Record Payment.
+        form = BookingForm(request.POST, tenant=tenant)
+        if form.is_valid():
+            cd = form.cleaned_data
+            params = {
+                'config': str(cd['config'].pk), 'date': cd['date'].isoformat(),
+                'start_time': cd['start_time'].strftime('%H:%M'),
+                'end_time': cd['end_time'].strftime('%H:%M'),
+                'discount_type': cd.get('discount_type') or 'none',
+                'discount_value': cd.get('discount_value'),
+                'additional_charge_amount': cd.get('additional_charge_amount'),
+            }
+            try:
+                with transaction.atomic():
+                    services.lock_tenant(tenant)
+                    booking = Booking.objects.select_for_update().get(pk=booking.pk)
+                    if booking.booking_status in ('cancelled', 'completed'):
+                        raise services.ValidationError('This booking is no longer editable.')
+                    result, errors = _edit_price(tenant, params, booking)
+                    if errors:
+                        raise services.ValidationError(' '.join(errors))
+                    if result['final_amount'] < 0:
+                        raise services.ValidationError('Final amount cannot be negative.')
+                    old = {
+                        'date': str(booking.date), 'start': str(booking.start_time),
+                        'end': str(booking.end_time), 'config': str(booking.config_id),
+                        'final_amount': str(booking.final_amount),
+                    }
+                    customer = booking.customer
+                    if customer.phone != cd['customer_phone']:
+                        # Avoid changing a customer shared by other bookings.
+                        customer, _ = Customer.objects.get_or_create(
+                            tenant=tenant, phone=cd['customer_phone'],
+                            defaults={'name': cd['customer_name']})
+                        booking.customer = customer
+                    elif customer.name != cd['customer_name']:
+                        customer.name = cd['customer_name']
+                        customer.save(update_fields=['name'])
+                    booking.config = cd['config']
+                    booking.sport = cd.get('sport')
+                    booking.date = cd['date']
+                    booking.start_time = cd['start_time']
+                    booking.end_time = cd['end_time']
+                    booking.duration_minutes = result['duration_minutes']
+                    booking.day_type = result['day_type']
+                    booking.lights = result['lights_required']
+                    booking.price_per_hour = result['price_per_hour']
+                    booking.base_amount = result['base_amount']
+                    booking.discount_amount = result['discount_amount']
+                    booking.additional_charges_amount = result['additional_amount']
+                    booking.final_amount = result['final_amount']
+                    booking.booking_type = cd['booking_type']
+                    booking.notes = cd.get('notes', '')
+                    booking.payment_status = services.derive_payment_status(
+                        booking.final_amount, booking.total_received)
+                    booking.save()
+                    # Replace pricing adjustments; retain every payment record.
+                    booking.discounts.all().delete()
+                    if result['discount_amount'] > 0 and cd.get('discount_type') != 'none':
+                        BookingDiscount.objects.create(
+                            booking=booking, discount_type=cd['discount_type'],
+                            discount_value=cd.get('discount_value') or 0,
+                            discount_amount=result['discount_amount'], applied_by=request.user)
+                    booking.additional_charges.all().delete()
+                    if result['additional_amount'] > 0:
+                        BookingAdditionalCharge.objects.create(
+                            booking=booking, charge_type='other',
+                            description=cd.get('additional_charge_desc') or '',
+                            amount=result['additional_amount'])
+                    AuditLog.objects.create(
+                        tenant=tenant, user=request.user, action='update',
+                        entity='Booking', entity_id=str(booking.id),
+                        old_value=old,
+                        new_value={
+                            'date': str(booking.date), 'start': str(booking.start_time),
+                            'end': str(booking.end_time), 'config': str(booking.config_id),
+                            'final_amount': str(booking.final_amount),
+                        })
+                messages.success(request, f'Booking {booking.booking_code} updated. Pricing recalculated.')
+                return redirect('booking_detail', booking_id=booking.id)
+            except services.ValidationError as exc:
+                messages.error(request, str(exc))
+    else:
+        form = BookingForm(initial=_edit_initial(booking), tenant=tenant)
+    configs = list(BookableConfig.objects.filter(is_active=True))
+    allowed = {}
+    for cid, sid in BookableConfig.sports.through.objects.filter(
+            bookableconfig__tenant=tenant).values_list('bookableconfig_id', 'sport_id'):
+        allowed.setdefault(str(cid), []).append(str(sid))
+    return render(request, 'core/booking_edit.html', {
+        'active': 'bookings', 'booking': booking, 'form': form,
+        'has_sports': Sport.objects.filter(is_active=True).exists(),
+        'config_sports': {str(c.id): allowed.get(str(c.id), []) for c in configs},
+    })
+
 
 @tenant_view
 @require_roles(*ALL_ROLES)

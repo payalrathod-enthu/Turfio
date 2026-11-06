@@ -1,0 +1,14 @@
+/* Shared across all businesses, no tenant-specific styling */
+.booking-stat {padding:1.1rem 1.25rem; background:#fff;border:1px solid #e2e8f0;border-radius:16px;box-shadow:0 2px 5px #0f172a08}
+.booking-stat .value{font-size:1.7rem;font-weight:750;color:#0f172a;line-height:1.2}
+.booking-stat .caption{font-size:.83rem;color:#64748b}
+.booking-tabs{display:flex;gap:.5rem;flex-wrap:wrap}
+.booking-tabs a{padding:.6rem 1rem;text-decoration:none;border:1px solid #e2e8f0;border-radius:10px;color:#334155;background:#fff;font-weight:500}
+.booking-tabs a.active{background:#15803d;color:#fff;border-color:#15803d}
+.booking-filter-card,.booking-table-card{background:#fff;border:1px solid #e2e8f0;border-radius:16px;padding:1rem;box-shadow:0 1px 3px #0f172a08}
+.booking-table-card table{white-space:nowrap}
+.booking-table-card th{font-size:.8rem;color:#64748b;font-weight:650}
+.booking-table-card td{padding:.85rem .5rem;vertical-align:middle}
+.booking-table-card .dropdown-menu{min-width:200px}
+.edit-sticky-summary{position:sticky;top:20px}
+@media(max-width:991px){.edit-sticky-summary{position:static}}
