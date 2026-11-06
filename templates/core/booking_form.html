@@ -1,158 +1,507 @@
+
 {% extends "base.html" %}
+{% load static %}
 {% load form_filters %}
+
 {% block title %}New Booking{% endblock %}
+
 {% block content %}
-  <h4 class="mb-3">New Booking</h4>
 
-  {% if messages %}
-    {% for m in messages %}
-      <div class="alert alert-{{ m.tags }} py-2 small">{{ m }}</div>
-    {% endfor %}
-  {% endif %}
+<link rel="stylesheet" href="{% static 'css/booking-create.css' %}?v=2">
 
-  <div class="row g-3">
-    <div class="col-12 col-lg-7">
-      <form id="booking-form" method="post" action="{% url 'booking_create' %}">
-        {% csrf_token %}
-        <div class="tif-card p-3 mb-3">
-          <h6 class="mb-3">Customer</h6>
-          <div class="row g-2">
-            <div class="col-6"><label class="form-label small">Name</label>{{ form.customer_name }}</div>
-            <div class="col-6"><label class="form-label small">Contact Number</label>{{ form.customer_phone }}</div>
-          </div>
-        </div>
+<div class="booking-workspace">
 
-        <div class="tif-card p-3 mb-3">
-          <h6 class="mb-3">Booking Details</h6>
-          <div class="row g-2">
-            {% if has_sports %}
-              <div class="col-12">
-                <label class="form-label small">Sport</label>
-                {{ form.sport }}
-                {% for e in form.sport.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
-              </div>
-            {% else %}
-              <div class="col-12"><div class="alert alert-info py-2 small mb-0">No sports are set up yet. <a href="{% url 'settings_sports' %}">Add your sports</a> so every booking records one.</div></div>
-            {% endif %}
-            <div class="col-12">
-              <label class="form-label small">Ground</label>
-              {{ form.config|hx:"hx-get:/bookings/preview/|hx-target:#price-summary|hx-trigger:change|hx-include:#booking-form" }}
-              {% for e in form.config.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
-            </div>
-            <div class="col-4">
-              <label class="form-label small">Date</label>
-              {{ form.date|hx:"hx-get:/bookings/preview/|hx-target:#price-summary|hx-trigger:change|hx-include:#booking-form" }}
-            </div>
-            <div class="col-4">
-              <label class="form-label small">Start Time</label>
-              {{ form.start_time|hx:"hx-get:/bookings/preview/|hx-target:#price-summary|hx-trigger:change|hx-include:#booking-form" }}
-            </div>
-            <div class="col-4">
-              <label class="form-label small">End Time</label>
-              {{ form.end_time|hx:"hx-get:/bookings/preview/|hx-target:#price-summary|hx-trigger:change|hx-include:#booking-form" }}
-            </div>
-            {% if overnight %}
-              <div class="col-12 form-text">Running past midnight? Enter an end time earlier than the start, for example 11:00 PM to 1:00 AM. For a booking that starts after midnight, choose the next calendar date.</div>
-            {% endif %}
-            <div class="col-6 d-flex align-items-center gap-2 mt-2">
-              {{ form.lights }}
-              <label class="form-label small mb-0">Lights (added automatically)</label>
-            </div>
-            <div class="col-6 mt-2">
-              <label class="form-label small">Booking Type</label>
-              {{ form.booking_type }}
-            </div>
-          </div>
-          {% if form.end_time.errors %}
-            <div class="text-danger small mt-2">{{ form.end_time.errors|join:", " }}</div>
-          {% endif %}
-        </div>
-
-        <div class="tif-card p-3 mb-3">
-          <h6 class="mb-3">Discount &amp; Additional Charges</h6>
-          <div class="row g-2">
-            <div class="col-6">
-              <label class="form-label small">Discount Type</label>
-              {{ form.discount_type|hx:"hx-get:/bookings/preview/|hx-target:#price-summary|hx-trigger:change|hx-include:#booking-form" }}
-            </div>
-            <div class="col-6">
-              <label class="form-label small">Discount Value</label>
-              {{ form.discount_value|hx:"hx-get:/bookings/preview/|hx-target:#price-summary|hx-trigger:keyup changed delay:400ms|hx-include:#booking-form" }}
-            </div>
-            <div class="col-6">
-              <label class="form-label small">Additional Charge Description</label>
-              {{ form.additional_charge_desc }}
-            </div>
-            <div class="col-6">
-              <label class="form-label small">Additional Charge Amount</label>
-              {{ form.additional_charge_amount|hx:"hx-get:/bookings/preview/|hx-target:#price-summary|hx-trigger:keyup changed delay:400ms|hx-include:#booking-form" }}
-            </div>
-          </div>
-        </div>
-
-        <div class="tif-card p-3 mb-3">
-          <h6 class="mb-3">Payment</h6>
-          <div class="row g-2">
-            <div class="col-6">
-              <label class="form-label small">Cash Paid</label>
-              {{ form.cash_paid|hx:"hx-get:/bookings/preview/|hx-target:#price-summary|hx-trigger:keyup changed delay:400ms|hx-include:#booking-form" }}
-            </div>
-            <div class="col-6">
-              <label class="form-label small">Online Paid</label>
-              {{ form.online_paid|hx:"hx-get:/bookings/preview/|hx-target:#price-summary|hx-trigger:keyup changed delay:400ms|hx-include:#booking-form" }}
-            </div>
-          </div>
-        </div>
-
-        <div class="tif-card p-3 mb-3">
-          <label class="form-label small">Notes</label>
-          {{ form.notes }}
-        </div>
-
-        <button type="submit" class="btn btn-success w-100 py-2 fw-semibold">CONFIRM BOOKING</button>
-      </form>
-    </div>
-
-    <div class="col-12 col-lg-5">
-      <div id="price-summary" hx-get="{% url 'booking_price_preview' %}" hx-trigger="load" hx-include="#booking-form">
-        <div class="tif-card p-3 text-muted small">Fill in ground, date, and times to see pricing.</div>
-      </div>
+  <div class="booking-page-heading">
+    <i class="bi bi-calendar-plus"></i>
+    <div>
+      <h1>New Booking</h1>
+      <p>Create a booking for your customer</p>
     </div>
   </div>
 
-  <script>
-    const LIGHTS_START = "{{ lights_start }}";
-    function updateLightsIndicator() {
-      const start = document.querySelector('[name="start_time"]');
-      const end = document.querySelector('[name="end_time"]');
-      const box = document.querySelector('[name="lights"]');
-      if (!end || !box) return;
-      const crossesMidnight = start && start.value && end.value && end.value <= start.value;
-      box.checked = Boolean(LIGHTS_START && end.value && (end.value > LIGHTS_START || crossesMidnight));
+  {% if messages %}
+    {% for m in messages %}
+      <div class="alert alert-{{ m.tags }} py-2">
+        {{ m }}
+      </div>
+    {% endfor %}
+  {% endif %}
+
+  <div class="booking-workspace-grid">
+
+    <!-- LEFT: BOOKING FORM -->
+    <div class="booking-form-column">
+
+      <form
+        id="booking-form"
+        method="post"
+        action="{% url 'booking_create' %}"
+      >
+        {% csrf_token %}
+
+        {% if form.non_field_errors %}
+          <div class="alert alert-danger">
+            {{ form.non_field_errors }}
+          </div>
+        {% endif %}
+
+        <!-- CUSTOMER DETAILS -->
+        <section class="booking-panel">
+
+          <div class="booking-panel-title">
+            <i class="bi bi-person"></i>
+            Customer Details
+          </div>
+
+          <div class="booking-form-grid">
+
+            <div class="booking-field">
+              <label for="{{ form.customer_name.id_for_label }}">
+                Customer Name
+              </label>
+              {{ form.customer_name }}
+              {% for e in form.customer_name.errors %}
+                <div class="text-danger small mt-1">{{ e }}</div>
+              {% endfor %}
+            </div>
+
+            <div class="booking-field">
+              <label for="{{ form.customer_phone.id_for_label }}">
+                Contact Number
+              </label>
+              {{ form.customer_phone }}
+              {% for e in form.customer_phone.errors %}
+                <div class="text-danger small mt-1">{{ e }}</div>
+              {% endfor %}
+            </div>
+
+          </div>
+
+        </section>
+
+        <!-- BOOKING DETAILS -->
+        <section class="booking-panel">
+
+          <div class="booking-panel-title">
+            <i class="bi bi-calendar-event"></i>
+            Booking Details
+          </div>
+
+          <div class="booking-form-grid">
+
+            {% if has_sports %}
+              <div class="booking-field">
+                <label for="{{ form.sport.id_for_label }}">
+                  Sport
+                </label>
+                {{ form.sport }}
+                {% for e in form.sport.errors %}
+                  <div class="text-danger small mt-1">{{ e }}</div>
+                {% endfor %}
+              </div>
+            {% else %}
+              <div class="booking-field booking-field-full">
+                <div class="alert alert-info small mb-0">
+                  No sports are set up yet.
+                  <a href="{% url 'settings_sports' %}">
+                    Add your sports
+                  </a>
+                  so every booking records one.
+                </div>
+              </div>
+            {% endif %}
+
+            <div class="booking-field {% if not has_sports %}booking-field-full{% endif %}">
+              <label for="{{ form.config.id_for_label }}">
+                Ground
+              </label>
+
+              {{ form.config|hx:"hx-get:/bookings/preview/|hx-target:#price-summary|hx-trigger:change|hx-include:#booking-form" }}
+
+              {% for e in form.config.errors %}
+                <div class="text-danger small mt-1">{{ e }}</div>
+              {% endfor %}
+            </div>
+
+            <div class="booking-field">
+              <label for="{{ form.date.id_for_label }}">
+                Date
+              </label>
+
+              {{ form.date|hx:"hx-get:/bookings/preview/|hx-target:#price-summary|hx-trigger:change|hx-include:#booking-form" }}
+
+              {% for e in form.date.errors %}
+                <div class="text-danger small mt-1">{{ e }}</div>
+              {% endfor %}
+            </div>
+
+            <div class="booking-field">
+              <label for="{{ form.booking_type.id_for_label }}">
+                Booking Type
+              </label>
+              {{ form.booking_type }}
+              {% for e in form.booking_type.errors %}
+                <div class="text-danger small mt-1">{{ e }}</div>
+              {% endfor %}
+            </div>
+
+            <div class="booking-field">
+              <label for="{{ form.start_time.id_for_label }}">
+                Start Time
+              </label>
+
+              {{ form.start_time|hx:"hx-get:/bookings/preview/|hx-target:#price-summary|hx-trigger:change|hx-include:#booking-form" }}
+
+              {% for e in form.start_time.errors %}
+                <div class="text-danger small mt-1">{{ e }}</div>
+              {% endfor %}
+            </div>
+
+            <div class="booking-field">
+              <label for="{{ form.end_time.id_for_label }}">
+                End Time
+              </label>
+
+              {{ form.end_time|hx:"hx-get:/bookings/preview/|hx-target:#price-summary|hx-trigger:change|hx-include:#booking-form" }}
+
+              {% for e in form.end_time.errors %}
+                <div class="text-danger small mt-1">{{ e }}</div>
+              {% endfor %}
+            </div>
+
+            <div class="booking-field booking-field-full">
+
+              <div class="booking-lights-hint">
+                <i class="bi bi-lightbulb"></i>
+                Lights are calculated automatically based on booking time.
+              </div>
+
+              <div class="d-flex align-items-center gap-2 mt-2">
+                {{ form.lights }}
+                <label
+                  for="{{ form.lights.id_for_label }}"
+                  class="mb-0 small"
+                >
+                  Lights (automatically selected)
+                </label>
+              </div>
+
+              {% for e in form.lights.errors %}
+                <div class="text-danger small mt-1">{{ e }}</div>
+              {% endfor %}
+
+              {% if overnight %}
+                <div class="booking-hint">
+                  <i class="bi bi-info-circle"></i>
+                  For overnight bookings, enter an end time earlier
+                  than the start time. For bookings beginning after
+                  midnight, select the next calendar date.
+                </div>
+              {% endif %}
+
+            </div>
+
+          </div>
+
+        </section>
+
+        <!-- DISCOUNTS AND ADDITIONAL CHARGES -->
+        <section class="booking-panel">
+
+          <div class="booking-panel-title mb-1">
+            <i class="bi bi-tags"></i>
+            Discounts &amp; Additional Charges
+            <span class="badge text-bg-light ms-auto">Optional</span>
+          </div>
+
+          <details
+            class="booking-optional"
+            {% if form.discount_type.errors or form.discount_value.errors or form.additional_charge_desc.errors or form.additional_charge_amount.errors %}open{% endif %}
+          >
+            <summary>
+              Add a discount or extra charge
+            </summary>
+
+            <div class="booking-optional-content">
+
+              <div class="booking-form-grid">
+
+                <div class="booking-field">
+                  <label for="{{ form.discount_type.id_for_label }}">
+                    Discount Type
+                  </label>
+
+                  {{ form.discount_type|hx:"hx-get:/bookings/preview/|hx-target:#price-summary|hx-trigger:change|hx-include:#booking-form" }}
+
+                  {% for e in form.discount_type.errors %}
+                    <div class="text-danger small mt-1">{{ e }}</div>
+                  {% endfor %}
+                </div>
+
+                <div class="booking-field">
+                  <label for="{{ form.discount_value.id_for_label }}">
+                    Discount Value
+                  </label>
+
+                  {{ form.discount_value|hx:"hx-get:/bookings/preview/|hx-target:#price-summary|hx-trigger:keyup changed delay:400ms|hx-include:#booking-form" }}
+
+                  {% for e in form.discount_value.errors %}
+                    <div class="text-danger small mt-1">{{ e }}</div>
+                  {% endfor %}
+                </div>
+
+                <div class="booking-field">
+                  <label for="{{ form.additional_charge_desc.id_for_label }}">
+                    Additional Charge Description
+                  </label>
+                  {{ form.additional_charge_desc }}
+
+                  {% for e in form.additional_charge_desc.errors %}
+                    <div class="text-danger small mt-1">{{ e }}</div>
+                  {% endfor %}
+                </div>
+
+                <div class="booking-field">
+                  <label for="{{ form.additional_charge_amount.id_for_label }}">
+                    Additional Charge Amount
+                  </label>
+
+                  {{ form.additional_charge_amount|hx:"hx-get:/bookings/preview/|hx-target:#price-summary|hx-trigger:keyup changed delay:400ms|hx-include:#booking-form" }}
+
+                  {% for e in form.additional_charge_amount.errors %}
+                    <div class="text-danger small mt-1">{{ e }}</div>
+                  {% endfor %}
+                </div>
+
+              </div>
+
+            </div>
+
+          </details>
+
+        </section>
+
+        <!-- PAYMENT DETAILS -->
+        <section class="booking-panel">
+
+          <div class="booking-panel-title">
+            <i class="bi bi-wallet2"></i>
+            Payment Details
+          </div>
+
+          <div class="booking-form-grid">
+
+            <div class="booking-field">
+              <label for="{{ form.cash_paid.id_for_label }}">
+                Cash Received
+              </label>
+
+              {{ form.cash_paid|hx:"hx-get:/bookings/preview/|hx-target:#price-summary|hx-trigger:keyup changed delay:400ms|hx-include:#booking-form" }}
+
+              {% for e in form.cash_paid.errors %}
+                <div class="text-danger small mt-1">{{ e }}</div>
+              {% endfor %}
+            </div>
+
+            <div class="booking-field">
+              <label for="{{ form.online_paid.id_for_label }}">
+                Online Received
+              </label>
+
+              {{ form.online_paid|hx:"hx-get:/bookings/preview/|hx-target:#price-summary|hx-trigger:keyup changed delay:400ms|hx-include:#booking-form" }}
+
+              {% for e in form.online_paid.errors %}
+                <div class="text-danger small mt-1">{{ e }}</div>
+              {% endfor %}
+            </div>
+
+          </div>
+
+          <div class="booking-hint">
+            Enter the amounts already received. The remaining
+            balance will appear in the booking summary.
+          </div>
+
+        </section>
+
+        <!-- NOTES -->
+        <section class="booking-panel">
+
+          <details class="booking-notes-details"
+            {% if form.notes.errors %}open{% endif %}>
+
+            <summary class="booking-notes-heading">
+              <i class="bi bi-journal-text"></i>
+              Add Notes
+              <span class="badge text-bg-light ms-auto">Optional</span>
+            </summary>
+
+            <div class="booking-field mt-3">
+              <label for="{{ form.notes.id_for_label }}">
+                Booking Notes
+              </label>
+              {{ form.notes }}
+
+              {% for e in form.notes.errors %}
+                <div class="text-danger small mt-1">{{ e }}</div>
+              {% endfor %}
+            </div>
+
+          </details>
+
+        </section>
+
+        <!-- MOBILE CONFIRMATION BUTTON -->
+        <button
+          type="submit"
+          class="booking-confirm-btn booking-mobile-confirm"
+        >
+          <i class="bi bi-check-circle me-2"></i>
+          Confirm Booking
+        </button>
+
+      </form>
+
+    </div>
+
+
+    <!-- RIGHT: STICKY BOOKING SUMMARY -->
+    <aside class="booking-summary-column">
+
+      <div class="booking-summary-card">
+
+        <div class="booking-summary-header">
+          <h2>
+            <i class="bi bi-receipt"></i>
+            Live Booking Summary
+          </h2>
+          <p>
+            Pricing updates automatically as you enter booking details.
+          </p>
+        </div>
+
+        <div class="booking-summary-body">
+
+          <!-- This content updates through your existing HTMX view -->
+          <div
+            id="price-summary"
+            hx-get="{% url 'booking_price_preview' %}"
+            hx-trigger="load"
+            hx-include="#booking-form"
+          >
+            <p class="text-muted small">
+              Select a ground, date, and time to see pricing.
+            </p>
+          </div>
+
+          <button
+            type="submit"
+            form="booking-form"
+            class="booking-confirm-btn booking-desktop-confirm"
+          >
+            <i class="bi bi-check-circle me-2"></i>
+            Confirm Booking
+          </button>
+
+          <p class="text-center text-muted small mt-3 mb-0">
+            <i class="bi bi-shield-check me-1"></i>
+            Please review the details before confirming.
+          </p>
+
+        </div>
+
+      </div>
+
+    </aside>
+
+  </div>
+
+</div>
+
+
+<!-- EXISTING AUTOMATIC LIGHTS LOGIC -->
+<script>
+  const LIGHTS_START = "{{ lights_start|escapejs }}";
+
+  function updateLightsIndicator() {
+    const start = document.querySelector('[name="start_time"]');
+    const end = document.querySelector('[name="end_time"]');
+    const box = document.querySelector('[name="lights"]');
+
+    if (!end || !box) return;
+
+    const crossesMidnight =
+      start &&
+      start.value &&
+      end.value &&
+      end.value <= start.value;
+
+    box.checked = Boolean(
+      LIGHTS_START &&
+      end.value &&
+      (end.value > LIGHTS_START || crossesMidnight)
+    );
+  }
+
+  document.addEventListener(
+    "DOMContentLoaded",
+    updateLightsIndicator
+  );
+
+  document.addEventListener("change", function (e) {
+    if (
+      e.target.name === "end_time" ||
+      e.target.name === "start_time"
+    ) {
+      updateLightsIndicator();
     }
-    document.addEventListener('DOMContentLoaded', updateLightsIndicator);
-    document.addEventListener('change', function (e) {
-      if (e.target.name === 'end_time' || e.target.name === 'start_time') updateLightsIndicator();
-    });
-  </script>
-    {{ config_sports|json_script:"config-sports" }}
-  <script>
-    (function () {
-      const sportSel = document.querySelector('[name="sport"]');
-      const cfgSel = document.querySelector('[name="config"]');
-      if (!sportSel || !cfgSel) return;
-      const allowed = JSON.parse(document.getElementById('config-sports').textContent);
-      function filterOptions() {
-        const sport = sportSel.value;
-        [...cfgSel.options].forEach(function (o) {
-          if (!o.value) return;
-          const list = allowed[o.value] || [];
-          o.disabled = Boolean(sport && list.length && !list.includes(sport));
-        });
-        if (cfgSel.selectedOptions[0] && cfgSel.selectedOptions[0].disabled) cfgSel.value = '';
+  });
+</script>
+
+
+<!-- EXISTING SPORT / GROUND FILTERING -->
+{{ config_sports|json_script:"config-sports" }}
+
+<script>
+  (function () {
+    const sportSel = document.querySelector('[name="sport"]');
+    const cfgSel = document.querySelector('[name="config"]');
+
+    if (!sportSel || !cfgSel) return;
+
+    const allowed = JSON.parse(
+      document.getElementById("config-sports").textContent
+    );
+
+    function filterOptions() {
+      const sport = sportSel.value;
+
+      [...cfgSel.options].forEach(function (o) {
+        if (!o.value) return;
+
+        const list = allowed[o.value] || [];
+
+        o.disabled = Boolean(
+          sport &&
+          list.length &&
+          !list.includes(sport)
+        );
+      });
+
+      if (
+        cfgSel.selectedOptions[0] &&
+        cfgSel.selectedOptions[0].disabled
+      ) {
+        cfgSel.value = "";
+        cfgSel.dispatchEvent(
+          new Event("change", { bubbles: true })
+        );
       }
-      sportSel.addEventListener('change', filterOptions);
-      filterOptions();
-    })();
-  </script>
+    }
+
+    sportSel.addEventListener("change", filterOptions);
+    filterOptions();
+  })();
+</script>
+
 {% endblock %}

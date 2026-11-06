@@ -1,66 +1,157 @@
+
 {% load inr_filters %}
-<div class="tif-card p-3">
-  <h6 class="mb-3">Booking Summary</h6>
+
+<div class="booking-price-content">
 
   {% if errors %}
     {% for e in errors %}
-      <div class="alert alert-danger py-2 small mb-2">{{ e }}</div>
+      <div class="alert alert-danger py-2 small mb-2">
+        <i class="bi bi-exclamation-circle me-1"></i>
+        {{ e }}
+      </div>
     {% endfor %}
   {% endif %}
 
   {% if r.duration_minutes %}
-    <div class="d-flex justify-content-between small text-muted mb-1">
-      <span>Duration</span><span>{{ r.duration_label }}</span>
+
+    <div class="booking-summary-detail">
+      <span>
+        <i class="bi bi-clock me-1"></i>
+        Duration
+      </span>
+      <strong>{{ r.duration_label }}</strong>
     </div>
-    <div class="d-flex justify-content-between small text-muted mb-2">
-      <span>Day Type</span><span>{{ r.day_type|title }}</span>
+
+    <div class="booking-summary-detail">
+      <span>
+        <i class="bi bi-calendar3 me-1"></i>
+        Day Type
+      </span>
+      <strong>{{ r.day_type|title }}</strong>
     </div>
 
     {% if r.base_amount %}
+
+      <div class="booking-summary-divider"></div>
+
+      <div class="small fw-semibold mb-2">
+        Price Breakdown
+      </div>
+
       {% if r.daylight_minutes %}
-        <div class="d-flex justify-content-between small text-muted mb-1">
-          <span>Daylight ({{ r.daylight_minutes }} min)</span><span>{{ r.daylight_rate|inr }}/hr → {{ r.daylight_amount|inr }}</span>
+        <div class="booking-summary-price">
+          <span class="text-muted">
+            Daylight ({{ r.daylight_minutes }} min)
+          </span>
+          <strong>{{ r.daylight_amount|inr }}</strong>
+        </div>
+
+        <div class="small text-muted mb-2">
+          {{ r.daylight_rate|inr }}/hr
         </div>
       {% endif %}
+
       {% if r.lights_minutes %}
-        <div class="d-flex justify-content-between small text-muted mb-1">
-          <span>Lights ({{ r.lights_minutes }} min)</span><span>{{ r.lights_rate|inr }}/hr → {{ r.lights_amount|inr }}</span>
+        <div class="booking-summary-price">
+          <span class="text-muted">
+            <i class="bi bi-lightbulb me-1"></i>
+            Lights ({{ r.lights_minutes }} min)
+          </span>
+          <strong>{{ r.lights_amount|inr }}</strong>
+        </div>
+
+        <div class="small text-muted mb-2">
+          {{ r.lights_rate|inr }}/hr
         </div>
       {% endif %}
 
-      <div class="d-flex justify-content-between mb-1 mt-2">
-        <span>Base Amount</span><span>{{ r.base_amount|inr }}</span>
-      </div>
-      {% if r.discount_amount %}
-        <div class="d-flex justify-content-between mb-1 text-danger">
-          <span>Discount</span><span>-{{ r.discount_amount|inr }}</span>
-        </div>
-      {% endif %}
-      {% if r.additional_amount %}
-        <div class="d-flex justify-content-between mb-1">
-          <span>Additional</span><span>+{{ r.additional_amount|inr }}</span>
-        </div>
-      {% endif %}
-      <hr>
-      <div class="d-flex justify-content-between fw-bold fs-5 mb-3">
-        <span>TOTAL</span><span>{{ r.final_amount|inr }}</span>
+      <div class="booking-summary-price">
+        <span>Base Amount</span>
+        <strong>{{ r.base_amount|inr }}</strong>
       </div>
 
-      <div class="d-flex justify-content-between small mb-1">
-        <span>Paid Cash</span><span>{{ r.cash_paid|inr }}</span>
+      <div class="booking-summary-price">
+        <span>Discount</span>
+        <strong class="text-danger">
+          -{{ r.discount_amount|default:0|inr }}
+        </strong>
       </div>
-      <div class="d-flex justify-content-between small mb-2">
-        <span>Paid Online</span><span>{{ r.online_paid|inr }}</span>
+
+      <div class="booking-summary-price">
+        <span>Additional Charges</span>
+        <strong>
+          +{{ r.additional_amount|default:0|inr }}
+        </strong>
       </div>
-      <hr>
-      <div class="d-flex justify-content-between mb-1">
-        <span>Received</span><span>{{ r.total_received|inr }}</span>
+
+      <div class="booking-summary-total">
+        <span>Total Amount</span>
+        <strong>{{ r.final_amount|inr }}</strong>
       </div>
-      <div class="d-flex justify-content-between fw-semibold {% if r.balance > 0 %}text-danger{% endif %}">
-        <span>Balance</span><span>{{ r.balance|inr }}</span>
+
+      <div class="booking-summary-divider"></div>
+
+      <div class="small fw-semibold mb-2">
+        Payment Summary
       </div>
+
+      <div class="booking-summary-price">
+        <span>Cash Received</span>
+        <strong>{{ r.cash_paid|inr }}</strong>
+      </div>
+
+      <div class="booking-summary-price">
+        <span>Online Received</span>
+        <strong>{{ r.online_paid|inr }}</strong>
+      </div>
+
+      <div class="booking-payment-summary">
+
+        <div class="booking-payment-box paid">
+          <span class="text-muted">Total Received</span>
+          <strong class="text-success">
+            {{ r.total_received|inr }}
+          </strong>
+        </div>
+
+        <div class="booking-payment-box">
+          <span class="text-muted">Balance Due</span>
+          <strong
+            class="{% if r.balance > 0 %}text-danger{% else %}text-success{% endif %}"
+          >
+            {{ r.balance|inr }}
+          </strong>
+        </div>
+
+      </div>
+
+    {% else %}
+
+      <div class="alert alert-info small mb-0">
+        Select a valid ground, date, and time to
+        calculate the booking price.
+      </div>
+
     {% endif %}
+
   {% else %}
-    <p class="text-muted small mb-0">Fill in ground, date, and times to see pricing.</p>
+
+    <div class="text-center py-4">
+      <i
+        class="bi bi-calendar-check text-success"
+        style="font-size: 2rem;"
+      ></i>
+
+      <p class="fw-semibold mt-3 mb-1">
+        Ready to create a booking?
+      </p>
+
+      <p class="text-muted small mb-0">
+        Select a ground, date, and time to calculate
+        the price and review the payment details.
+      </p>
+    </div>
+
   {% endif %}
+
 </div>
