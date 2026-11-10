@@ -1,0 +1,583 @@
+
+/* ==========================================
+   TURFIO PUBLIC WEBSITE
+   Landing + Owners + Marketplace
+   ========================================== */
+
+:root {
+  --site-green: #08752d;
+  --site-green-dark: #055d24;
+  --site-green-soft: #eaf8ee;
+  --site-ink: #101b27;
+  --site-muted: #64717f;
+  --site-border: #e4e9ee;
+}
+
+.public-site {
+  background: #fff;
+  color: var(--site-ink);
+  font-family: "Segoe UI", system-ui, sans-serif;
+  margin: 0;
+  min-height: 100vh;
+}
+
+.public-site * {
+  box-sizing: border-box;
+}
+
+.public-site a {
+  text-decoration: none;
+}
+
+/* HEADER */
+
+.site-header {
+  background: #fff;
+  border-bottom: 1px solid #edf0f2;
+  position: relative;
+  z-index: 10;
+}
+
+.site-nav {
+  min-height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.site-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--site-ink);
+  font-size: 1.8rem;
+  font-weight: 800;
+  letter-spacing: -1px;
+}
+
+.site-brand:hover {
+  color: var(--site-ink);
+}
+
+.site-brand-icon {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 43px;
+  height: 43px;
+  border-radius: 12px;
+  background: var(--site-green);
+  color: #fff;
+  font-size: 23px;
+}
+
+.site-nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 26px;
+}
+
+.site-login-link {
+  color: var(--site-ink);
+  font-weight: 600;
+}
+
+.site-login-link:hover {
+  color: var(--site-green);
+}
+
+/* BUTTONS */
+
+.site-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 13px 24px;
+  min-height: 48px;
+  border-radius: 11px;
+  font-size: 0.95rem;
+  font-weight: 650;
+  transition: all .2s ease;
+  text-align: center;
+}
+
+.site-btn-primary {
+  color: #fff;
+  background: var(--site-green);
+  border: 1px solid var(--site-green);
+}
+
+.site-btn-primary:hover {
+  color: #fff;
+  background: var(--site-green-dark);
+  border-color: var(--site-green-dark);
+  transform: translateY(-1px);
+}
+
+.site-btn-outline {
+  color: var(--site-green);
+  background: #fff;
+  border: 1px solid var(--site-green);
+}
+
+.site-btn-outline:hover {
+  background: var(--site-green-soft);
+  color: var(--site-green-dark);
+}
+
+/* ==========================================
+   LANDING PAGE
+   ========================================== */
+
+.welcome-section {
+  min-height: calc(100vh - 160px);
+  display: flex;
+  align-items: center;
+  padding: 58px 0 40px;
+  background:
+    radial-gradient(
+      ellipse at 0% 25%,
+      rgba(169, 235, 187, .27),
+      transparent 42%
+    ),
+    radial-gradient(
+      ellipse at 100% 85%,
+      rgba(190, 238, 200, .24),
+      transparent 45%
+    ),
+    #fbfefc;
+}
+
+.welcome-container {
+  max-width: 1150px;
+}
+
+.welcome-intro {
+  text-align: center;
+  margin-bottom: 34px;
+}
+
+.welcome-intro h1 {
+  font-size: clamp(2.4rem, 5vw, 4rem);
+  font-weight: 800;
+  letter-spacing: -2px;
+  margin-bottom: 10px;
+}
+
+.welcome-intro h1 span {
+  color: var(--site-green);
+}
+
+.welcome-subtitle {
+  font-size: 1.15rem;
+  color: var(--site-muted);
+  margin-bottom: 28px;
+}
+
+.welcome-intro h2 {
+  font-size: clamp(1.5rem, 3vw, 2.2rem);
+  font-weight: 750;
+  letter-spacing: -.8px;
+}
+
+.journey-card {
+  display: block;
+  height: 100%;
+  padding: 16px;
+  background: #fff;
+  border: 1px solid #edf0f2;
+  border-radius: 24px;
+  color: var(--site-ink);
+  box-shadow: 0 12px 32px rgba(15, 23, 42, .06);
+  transition: transform .2s ease, box-shadow .2s ease;
+}
+
+.journey-card:hover {
+  color: var(--site-ink);
+  transform: translateY(-5px);
+  box-shadow: 0 18px 42px rgba(15, 23, 42, .11);
+}
+
+.journey-image {
+  height: 235px;
+  overflow: hidden;
+  border-radius: 16px;
+  background: var(--site-green-soft);
+}
+
+.journey-image img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+  transition: transform .3s ease;
+}
+
+.journey-card:hover .journey-image img {
+  transform: scale(1.04);
+}
+
+.journey-card-content {
+  text-align: center;
+  padding: 20px 4px 2px;
+}
+
+.journey-card h3 {
+  font-size: 1.65rem;
+  font-weight: 750;
+  margin-bottom: 6px;
+}
+
+.journey-card p {
+  color: var(--site-muted);
+  margin-bottom: 20px;
+}
+
+.journey-button {
+  display: flex;
+  width: 100%;
+}
+
+.welcome-tagline {
+  margin: 28px 0 0;
+  text-align: center;
+  color: var(--site-muted);
+  font-size: 1rem;
+  font-style: italic;
+}
+
+/* ==========================================
+   OWNER INFORMATION PAGE
+   ========================================== */
+
+.owner-hero {
+  padding: 85px 0 65px;
+  background:
+    radial-gradient(
+      ellipse at 80% 30%,
+      rgba(186, 240, 198, .30),
+      transparent 50%
+    ),
+    #fff;
+}
+
+.owner-eyebrow {
+  display: inline-block;
+  padding: 9px 16px;
+  background: var(--site-green-soft);
+  color: var(--site-green);
+  border-radius: 50px;
+  font-size: .82rem;
+  font-weight: 800;
+  letter-spacing: .3px;
+  margin-bottom: 22px;
+}
+
+.owner-heading {
+  font-size: clamp(2.6rem, 4.2vw, 4.2rem);
+  font-weight: 800;
+  letter-spacing: -2px;
+  line-height: 1.13;
+  margin-bottom: 22px;
+}
+
+.owner-heading span {
+  color: var(--site-green);
+}
+
+.owner-description {
+  max-width: 480px;
+  font-size: 1.1rem;
+  color: var(--site-muted);
+  line-height: 1.7;
+  margin-bottom: 26px;
+}
+
+.owner-hero-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.dashboard-preview-wrap {
+  padding: 24px;
+  border-radius: 30px;
+  background: linear-gradient(
+    135deg,
+    #e6f8e9,
+    #f5fcf6
+  );
+}
+
+.dashboard-preview {
+  overflow: hidden;
+  background: #fff;
+  border: 1px solid #dfe8e2;
+  border-radius: 14px;
+  box-shadow: 0 20px 45px rgba(0, 0, 0, .12);
+}
+
+.preview-top {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 36px;
+  padding: 0 14px;
+  background: #f8fafc;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.preview-dot {
+  width: 8px;
+  height: 8px;
+  background: #d5dce4;
+  border-radius: 50%;
+}
+
+.preview-title {
+  margin-left: 12px;
+  color: var(--site-muted);
+  font-size: .75rem;
+}
+
+.dashboard-preview img {
+  width: 100%;
+  display: block;
+  height: auto;
+}
+
+/* FEATURES */
+
+.owner-features {
+  padding: 45px 0 65px;
+}
+
+.section-heading {
+  text-align: center;
+  margin-bottom: 34px;
+}
+
+.section-heading h2 {
+  font-size: clamp(1.65rem, 3vw, 2.4rem);
+  font-weight: 800;
+  letter-spacing: -.8px;
+}
+
+.section-heading p {
+  color: var(--site-muted);
+}
+
+.feature-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  height: 100%;
+  padding: 22px;
+  background: #fff;
+  border: 1px solid var(--site-border);
+  border-radius: 16px;
+  box-shadow: 0 3px 12px rgba(0, 0, 0, .035);
+}
+
+.feature-icon {
+  width: 54px;
+  height: 54px;
+  flex: 0 0 54px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 14px;
+  background: var(--site-green-soft);
+  color: var(--site-green);
+  font-size: 24px;
+}
+
+.feature-card h3 {
+  font-size: 1.08rem;
+  font-weight: 750;
+  margin: 3px 0 6px;
+}
+
+.feature-card p {
+  margin: 0;
+  color: var(--site-muted);
+  font-size: .9rem;
+  line-height: 1.55;
+}
+
+/* ADDITIONAL BENEFITS */
+
+.owner-benefits {
+  padding: 38px 0 58px;
+  background: #fbfcfd;
+}
+
+.benefit-item {
+  text-align: center;
+  padding: 15px 20px;
+}
+
+.benefit-item > i {
+  display: inline-block;
+  color: var(--site-green);
+  font-size: 26px;
+  margin-bottom: 13px;
+}
+
+.benefit-item h3 {
+  font-size: 1.05rem;
+  font-weight: 750;
+}
+
+.benefit-item p {
+  font-size: .9rem;
+  color: var(--site-muted);
+  margin-bottom: 0;
+}
+
+/* FINAL CTA */
+
+.owner-cta-section {
+  padding: 45px 0 75px;
+}
+
+.owner-cta {
+  padding: 55px 24px;
+  text-align: center;
+  border-radius: 26px;
+  background:
+    radial-gradient(
+      ellipse at 0% 100%,
+      rgba(155, 229, 171, .42),
+      transparent 42%
+    ),
+    radial-gradient(
+      ellipse at 100% 100%,
+      rgba(155, 229, 171, .42),
+      transparent 42%
+    ),
+    #f0faf2;
+}
+
+.owner-cta h2 {
+  font-size: clamp(1.6rem, 3vw, 2.2rem);
+  font-weight: 800;
+  margin-bottom: 10px;
+}
+
+.owner-cta p {
+  color: var(--site-muted);
+  margin-bottom: 24px;
+}
+
+/* FOOTER */
+
+.site-footer {
+  background: #fff;
+  border-top: 1px solid var(--site-border);
+}
+
+.site-footer-inner {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 15px;
+  padding-top: 23px;
+  padding-bottom: 23px;
+  color: var(--site-muted);
+  font-size: .85rem;
+}
+
+.site-footer-links {
+  display: flex;
+  gap: 22px;
+}
+
+.site-footer-links a {
+  color: var(--site-muted);
+}
+
+.site-footer-links a:hover {
+  color: var(--site-green);
+}
+
+/* ==========================================
+   RESPONSIVE
+   ========================================== */
+
+@media (max-width: 767.98px) {
+  .site-nav {
+    min-height: 68px;
+  }
+
+  .site-brand {
+    font-size: 1.4rem;
+  }
+
+  .site-brand-icon {
+    width: 36px;
+    height: 36px;
+    font-size: 19px;
+  }
+
+  .site-nav-actions {
+    gap: 12px;
+  }
+
+  .site-nav-signup {
+    padding: 10px 13px;
+    min-height: 40px;
+    font-size: .82rem;
+  }
+
+  .welcome-section {
+    padding: 45px 0;
+  }
+
+  .welcome-intro h1 {
+    letter-spacing: -1px;
+  }
+
+  .welcome-subtitle {
+    font-size: 1rem;
+  }
+
+  .journey-image {
+    height: 210px;
+  }
+
+  .owner-hero {
+    padding: 50px 0 35px;
+  }
+
+  .owner-heading {
+    letter-spacing: -1px;
+  }
+
+  .owner-hero-actions .site-btn {
+    flex: 1;
+  }
+
+  .dashboard-preview-wrap {
+    padding: 12px;
+  }
+
+  .feature-card {
+    padding: 18px;
+  }
+
+  .site-footer-inner {
+    flex-direction: column;
+    text-align: center;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .journey-card,
+  .journey-image img,
+  .site-btn {
+    transition: none;
+  }
+}

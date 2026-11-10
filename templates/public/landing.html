@@ -1,36 +1,125 @@
+
 {% extends "public/site_base.html" %}
-{% block title %}Book a turf{% endblock %}
+{% load static %}
+
+{% block title %}Welcome{% endblock %}
+
 {% block content %}
-  <div class="text-center py-5">
-    <h1 class="fw-bold">Your Turf, Just the Way You Want It.</h1>
-    <p class="lead text-muted mx-auto" style="max-width: 640px;">Find a turf, pick your sport and book a slot in a minute. No account needed. Own a turf? Run your bookings, payments and expenses from one place.</p>
-    <div class="d-flex justify-content-center gap-2 flex-wrap mt-3">
-      <a class="btn btn-success btn-lg" href="{% url 'marketplace' %}">Find a Turf</a>
-      <a class="btn btn-outline-dark btn-lg" href="{% url 'signup' %}">For Turf Owners</a>
+
+<!-- ==========================================
+     TURFIO LANDING PAGE
+     ========================================== -->
+
+<section class="welcome-section">
+
+  <div class="container welcome-container">
+
+    <!-- WELCOME HEADING -->
+    <div class="welcome-intro">
+
+      <h1>
+        Welcome to
+        <span>Turfio.</span>
+      </h1>
+
+      <p class="welcome-subtitle">
+        One platform for playing and managing sports.
+      </p>
+
+      <h2>What brings you here?</h2>
+
     </div>
+
+    <!-- PLAYER AND TURF OWNER CARDS -->
+    <div class="row g-4 justify-content-center">
+
+      <!-- ======================================
+           PLAYER CARD
+           ====================================== -->
+      <div class="col-12 col-md-6 col-lg-5">
+
+        <a
+          href="{% url 'marketplace' %}"
+          class="journey-card"
+        >
+
+          <div class="journey-image player-image">
+
+            <img
+              src="{% static 'images/landing-player.png' %}"
+              alt="Football on a sports field"
+              loading="eager"
+            >
+
+          </div>
+
+          <div class="journey-card-content">
+
+            <h3>I want to play</h3>
+
+            <p>
+              Find and book a turf near you.
+            </p>
+
+            <span class="site-btn site-btn-primary journey-button">
+              Book a Turf
+              <i class="bi bi-arrow-right"></i>
+            </span>
+
+          </div>
+
+        </a>
+
+      </div>
+
+      <!-- ======================================
+           TURF OWNER CARD
+           ====================================== -->
+      <div class="col-12 col-md-6 col-lg-5">
+
+        <a
+          href="{% url 'owners_info' %}"
+          class="journey-card"
+        >
+
+          <div class="journey-image owner-image">
+
+            <img
+              src="{% static 'images/landing-owner.png' %}"
+              alt="Sports facility management dashboard on a laptop"
+              loading="eager"
+            >
+
+          </div>
+
+          <div class="journey-card-content">
+
+            <h3>I own a turf</h3>
+
+            <p>
+              Manage your turf business.
+            </p>
+
+            <span class="site-btn site-btn-primary journey-button">
+              For Turf Owners
+              <i class="bi bi-arrow-right"></i>
+            </span>
+
+          </div>
+
+        </a>
+
+      </div>
+
+    </div>
+
+    <!-- BOTTOM TAGLINE -->
+    <p class="welcome-tagline">
+      Book smarter. Manage easier. Play more.
+    </p>
+
   </div>
 
-  <div class="row g-3 mb-4">
-    <div class="col-md-6">
-      <div class="tif-card p-4 h-100">
-        <h5>For players</h5>
-        <ol class="mb-0 small">
-          <li>Open a turf and choose your sport.</li>
-          <li>Pick a date and time. You see what's free and the price.</li>
-          <li>Enter your name and number. Your booking is confirmed straight away.</li>
-        </ol>
-      </div>
-    </div>
-    <div class="col-md-6">
-      <div class="tif-card p-4 h-100">
-        <h5>For turf owners</h5>
-        <ul class="mb-2 small">
-          <li>Set up your grounds, sports, prices and hours in your own way.</li>
-          <li>Customers book online. You are notified.</li>
-          <li>Track payments, expenses and reports.</li>
-        </ul>
-        <a href="{% url 'signup' %}" class="small">Create your account</a> · <a href="{% url 'login_view' %}" class="small">Log in</a>
-      </div>
-    </div>
-  </div>
+</section>
+
 {% endblock %}

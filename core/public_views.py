@@ -29,6 +29,15 @@ def home(request):
         return dashboard(request)
     return render(request, "public/landing.html")
 
+
+def owners_info(request):
+    """
+    Public information page for turf owners.
+    Does not require login or tenant selection.
+    """
+    return render(request, "public/owners.html")
+
+
 def marketplace(request):
     q = request.GET.get('q', '').strip()[:80]
     city = request.GET.get('city', '').strip()[:80]

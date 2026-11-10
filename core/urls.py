@@ -2,9 +2,22 @@ from django.contrib.auth import views as auth_django_views
 from django.urls import path, reverse_lazy
 
 from . import auth_views, public_views, setup_views, sport_views, views
+
 urlpatterns = [
     path('', public_views.home, name='dashboard'),
-    path('turfs/', public_views.marketplace, name='marketplace'),
+
+    path(
+        'turfs/',
+        public_views.marketplace,
+        name='marketplace'
+    ),
+
+    path(
+        'for-owners/',
+        public_views.owners_info,
+        name='owners_info'
+    ),
+
 
     path('bookings/', views.bookings, name='bookings'),
     path('bookings/new/', views.booking_create, name='booking_create'),
@@ -88,4 +101,7 @@ urlpatterns = [
     path('setup/names/', setup_views.setup_names, name='setup_names'),
     path('settings/sports/', sport_views.sports_page, name='settings_sports'),
     path('settings/sports/action/', sport_views.sports_action, name='sports_action'),
+
+    path('', public_views.home, name='dashboard'),
+    path('turfs/', public_views.marketplace, name='marketplace'),
 ]

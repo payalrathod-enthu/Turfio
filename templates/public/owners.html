@@ -1,0 +1,284 @@
+
+{% extends "public/site_base.html" %}
+{% load static %}
+
+{% block title %}For Turf Owners{% endblock %}
+
+{% block content %}
+
+<section class="owner-hero">
+
+  <div class="container">
+
+    <div class="row align-items-center g-5">
+
+      <!-- LEFT CONTENT -->
+      <div class="col-12 col-lg-5">
+
+        <div class="owner-eyebrow">
+          TURFIO FOR BUSINESS
+        </div>
+
+        <h1 class="owner-heading">
+          Your turf.<br>
+          Your rules.<br>
+          <span>One platform.</span>
+        </h1>
+
+        <p class="owner-description">
+          Manage bookings, availability, payments,
+          customers and daily operations from one place.
+        </p>
+
+        <div class="owner-hero-actions">
+
+          <a
+            href="{% url 'signup' %}"
+            class="site-btn site-btn-primary"
+          >
+            <i class="bi bi-person-plus"></i>
+            Create Account
+          </a>
+
+          <a
+            href="{% url 'login_view' %}"
+            class="site-btn site-btn-outline"
+          >
+            <i class="bi bi-box-arrow-in-right"></i>
+            Log in
+          </a>
+
+        </div>
+
+      </div>
+
+      <!-- RIGHT DASHBOARD PREVIEW -->
+      <div class="col-12 col-lg-7">
+
+        <div class="dashboard-preview-wrap">
+
+          <div class="dashboard-preview">
+
+            <div class="preview-top">
+              <span class="preview-dot"></span>
+              <span class="preview-dot"></span>
+              <span class="preview-dot"></span>
+              <span class="preview-title">
+                Turfio Dashboard
+              </span>
+            </div>
+
+            <img
+              src="{% static 'images/owner-dashboard.png' %}"
+              alt="Preview of the turf management dashboard"
+            >
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</section>
+
+
+<!-- FEATURES -->
+<section class="owner-features" id="features">
+
+  <div class="container">
+
+    <div class="section-heading">
+      <h2>
+        Everything you need to manage your turf
+      </h2>
+
+      <p>
+        Simple tools to manage your business every day.
+      </p>
+    </div>
+
+    <div class="row g-3">
+
+      <!-- BOOKINGS -->
+      <div class="col-12 col-md-6 col-lg-4">
+        <div class="feature-card">
+          <div class="feature-icon">
+            <i class="bi bi-calendar-check"></i>
+          </div>
+          <div>
+            <h3>Bookings</h3>
+            <p>
+              Create, manage and edit reservations.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- AVAILABILITY -->
+      <div class="col-12 col-md-6 col-lg-4">
+        <div class="feature-card">
+          <div class="feature-icon">
+            <i class="bi bi-clock-history"></i>
+          </div>
+          <div>
+            <h3>Availability</h3>
+            <p>
+              Track free and booked slots.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- PAYMENTS -->
+      <div class="col-12 col-md-6 col-lg-4">
+        <div class="feature-card">
+          <div class="feature-icon">
+            <i class="bi bi-wallet2"></i>
+          </div>
+          <div>
+            <h3>Payments</h3>
+            <p>
+              Record cash and online payments
+              and track outstanding balances.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- ANALYTICS -->
+      <div class="col-12 col-md-6 col-lg-4">
+        <div class="feature-card">
+          <div class="feature-icon">
+            <i class="bi bi-bar-chart"></i>
+          </div>
+          <div>
+            <h3>Analytics & Reports</h3>
+            <p>
+              Understand bookings, revenue,
+              expenses and performance.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- TOURNAMENTS -->
+      <div class="col-12 col-md-6 col-lg-4">
+        <div class="feature-card">
+          <div class="feature-icon">
+            <i class="bi bi-trophy"></i>
+          </div>
+          <div>
+            <h3>Tournaments</h3>
+            <p>
+              Organize tournaments and manage
+              their bookings.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- FLEXIBLE SETUP -->
+      <div class="col-12 col-md-6 col-lg-4">
+        <div class="feature-card">
+          <div class="feature-icon">
+            <i class="bi bi-sliders"></i>
+          </div>
+          <div>
+            <h3>Flexible Setup</h3>
+            <p>
+              Configure grounds, sports,
+              operating hours and pricing.
+            </p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+</section>
+
+
+<!-- ADDITIONAL BENEFITS -->
+<section class="owner-benefits">
+
+  <div class="container">
+
+    <div class="row g-4">
+
+      <div class="col-12 col-md-4">
+        <div class="benefit-item">
+          <i class="bi bi-people"></i>
+          <h3>Customer Management</h3>
+          <p>
+            Keep your customer information
+            and booking history organized.
+          </p>
+        </div>
+      </div>
+
+      <div class="col-12 col-md-4">
+        <div class="benefit-item">
+          <i class="bi bi-receipt"></i>
+          <h3>Expense Tracking</h3>
+          <p>
+            Record business expenses
+            and manage your finances.
+          </p>
+        </div>
+      </div>
+
+      <div class="col-12 col-md-4">
+        <div class="benefit-item">
+          <i class="bi bi-person-gear"></i>
+          <h3>Team Access</h3>
+          <p>
+            Give your staff access according
+            to their responsibilities.
+          </p>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+</section>
+
+
+<!-- FINAL CTA -->
+<section class="owner-cta-section">
+
+  <div class="container">
+
+    <div class="owner-cta">
+
+      <h2>
+        Ready to simplify turf management?
+      </h2>
+
+      <p>
+        Set up your business and start
+        managing it with Turfio.
+      </p>
+
+      <a
+        href="{% url 'signup' %}"
+        class="site-btn site-btn-primary"
+      >
+        Get Started
+        <i class="bi bi-arrow-right"></i>
+      </a>
+
+    </div>
+
+  </div>
+
+</section>
+
+{% endblock %}
