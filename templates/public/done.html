@@ -6,137 +6,164 @@
 
 {% block content %}
 
-<div class="tif-card p-4 text-center">
+<div class="pb-narrow pb-success">
 
-    <!-- Success Icon -->
-    <i class="bi bi-check-circle-fill text-success"
-       style="font-size: 3rem;"></i>
+  <div class="tif-card p-4">
 
-    <!-- Confirmation Heading -->
-    <h3 class="mt-3 mb-2">
-        Your Slot Is Confirmed!
-    </h3>
+    <!-- SUCCESS ICON -->
+    <div class="pb-success-icon">
+      <i class="bi bi-check-lg"></i>
+    </div>
 
-    <p class="text-muted mb-4">
-        Your turf booking has been successfully confirmed.
-        Your selected slot is now reserved.
+    <h1 class="pb-page-heading mt-3">
+      Your Slot Is Confirmed!
+    </h1>
+
+    <p class="pb-description">
+      Your turf booking has been successfully confirmed.
+      Your selected slot is now reserved.
     </p>
 
-    <!-- Booking Reference -->
-    <div class="mb-3">
-        <p class="small text-muted mb-1">
-            Booking Reference
-        </p>
+    <!-- BOOKING CODE -->
+    <div class="pb-reference">
 
-        <h4 class="fw-bold">
-            {{ booking.booking_code }}
-        </h4>
-    </div>
+      <p class="small text-muted mb-1">
+        Booking Reference
+      </p>
 
-    <hr>
-
-    <!-- Booking Details -->
-    <div class="my-3">
-
-        <p class="fw-semibold mb-2">
-            {{ booking.config.bookable_type.name }}
-        </p>
-
-        {% if booking.sport %}
-        <p class="small mb-2">
-            <strong>Sport:</strong>
-            {{ booking.sport.name }}
-        </p>
-        {% endif %}
-
-        <p class="small text-muted mb-2">
-            <i class="bi bi-calendar-event"></i>
-            {{ booking.date|date:"l, d F Y" }}
-        </p>
-
-        <p class="small text-muted mb-2">
-            <i class="bi bi-clock"></i>
-            {{ booking.start_time|time:"g:i A" }}
-            –
-            {{ booking.end_time|time:"g:i A" }}
-        </p>
-
-        {% if booking.config.name %}
-        <p class="small text-muted mb-2">
-            <i class="bi bi-geo-alt"></i>
-            Ground: {{ booking.config.name }}
-        </p>
-        {% endif %}
+      <h3 class="fw-bold mb-0">
+        {{ booking.booking_code }}
+      </h3>
 
     </div>
 
-    <hr>
+    <!-- BOOKING DETAILS -->
+    <div class="pb-confirm-details">
 
-    <!-- Booking Amount -->
-    <div class="my-3">
+      <h5 class="fw-bold mb-3">
+        Booking Details
+      </h5>
 
-        <p class="small text-muted mb-1">
-            Total Booking Amount
-        </p>
+      <div class="pb-detail-row">
+        <span>Turf</span>
+        <strong>{{ biz.name }}</strong>
+      </div>
 
-        <h3 class="fw-bold mb-2">
-            {{ booking.final_amount|inr }}
-        </h3>
+      <div class="pb-detail-row">
+        <span>Ground Type</span>
+        <strong>
+          {{ booking.config.bookable_type.name }}
+        </strong>
+      </div>
 
-        {% if booking.payment_status == "paid" %}
-        <span class="badge bg-success">
-            <i class="bi bi-check-circle"></i>
-            Payment Completed
-        </span>
-        {% elif booking.payment_status == "partial" %}
-        <span class="badge bg-warning text-dark">
-            <i class="bi bi-info-circle"></i>
-            Partially Paid
-        </span>
-        {% else %}
-        <span class="badge bg-warning text-dark">
-            <i class="bi bi-info-circle"></i>
-            Payment Pending
-        </span>
-        {% endif %}
+      {% if booking.config.name %}
+
+        <div class="pb-detail-row">
+          <span>Ground</span>
+          <strong>{{ booking.config.name }}</strong>
+        </div>
+
+      {% endif %}
+
+      {% if booking.sport %}
+
+        <div class="pb-detail-row">
+          <span>Sport</span>
+          <strong>{{ booking.sport.name }}</strong>
+        </div>
+
+      {% endif %}
+
+      <div class="pb-detail-row">
+        <span>Date</span>
+        <strong>
+          {{ booking.date|date:"l, d F Y" }}
+        </strong>
+      </div>
+
+      <div class="pb-detail-row">
+        <span>Time</span>
+        <strong>
+          {{ booking.start_time|time:"g:i A" }}
+          –
+          {{ booking.end_time|time:"g:i A" }}
+        </strong>
+      </div>
+
+      <div class="pb-detail-row">
+        <span>Booking Status</span>
+        <strong class="text-success">
+          Confirmed
+        </strong>
+      </div>
 
     </div>
 
-    <!-- Confirmation Message -->
-    <div class="mt-4 mb-3">
+    <!-- BOOKING AMOUNT -->
+    <div class="pb-confirm-amount">
 
-        <p class="text-success fw-semibold mb-2">
-            <i class="bi bi-check-circle"></i>
-            Your booking is confirmed!
-        </p>
+      <p class="text-muted small mb-1">
+        Total Booking Amount
+      </p>
 
-        <p class="small text-muted mb-2">
-            No further approval from {{ biz.name }} is required.
-        </p>
+      <h2 class="fw-bold mb-2">
+        {{ booking.final_amount|inr }}
+      </h2>
 
-        {% if booking.payment_status == "unpaid" %}
-        <p class="small text-muted mb-2">
-            No online payment has been collected at this stage.
-        </p>
-        {% endif %}
-
-        {% if biz.contact_phone %}
-        <p class="small text-muted">
-            For payment or booking inquiries, contact
-            <a href="tel:{{ biz.contact_phone }}">
-                {{ biz.contact_phone }}
-            </a>.
-        </p>
-        {% endif %}
+      <p class="small text-muted mb-0">
+        No online payment is collected through Turfio.
+      </p>
 
     </div>
 
-    <!-- Book Another Slot -->
-    <a href="{% url 'public_home' slug=biz.slug %}"
-       class="btn btn-outline-success mt-2">
-        <i class="bi bi-calendar-plus"></i>
-        Book Another Slot
+    <!-- CONFIRMATION MESSAGE -->
+    <div class="pb-booking-notice mt-4">
+
+      <i class="bi bi-check-circle-fill text-success"></i>
+
+      <span>
+        Your booking is confirmed.
+        No further approval from {{ biz.name }} is required.
+      </span>
+
+    </div>
+
+    {% if biz.contact_phone %}
+
+      <p class="small text-muted mt-4 mb-3">
+        For booking or payment inquiries, contact
+        <a href="tel:{{ biz.contact_phone }}">
+          {{ biz.contact_phone }}
+        </a>.
+      </p>
+
+      <a
+        href="tel:{{ biz.contact_phone }}"
+        class="btn btn-outline-success w-100 mb-2"
+      >
+        <i class="bi bi-telephone"></i>
+        Contact Turf
+      </a>
+
+    {% endif %}
+
+    <!-- ACTIONS -->
+    <a
+      href="{% url 'public_home' slug=biz.slug %}"
+      class="btn btn-success w-100 mt-2 pb-primary-action"
+    >
+      <i class="bi bi-calendar-plus"></i>
+      Book Another Slot
     </a>
+
+    <a
+      href="{% url 'marketplace' %}"
+      class="btn btn-link text-success mt-2"
+    >
+      Explore More Turfs
+    </a>
+
+  </div>
 
 </div>
 

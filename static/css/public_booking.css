@@ -1,0 +1,560 @@
+
+/* =========================================
+   TURFIO CUSTOMER BOOKING DESIGN
+   ========================================= */
+
+.turfio-public-booking {
+  background: #f8fafb;
+  color: #0c1c30;
+  font-family: Inter, system-ui, Arial, sans-serif;
+  min-height: 100vh;
+}
+
+/* HEADER */
+
+.pb-site-header {
+  background: #ffffff;
+  border-bottom: 1px solid #e7ebef;
+}
+
+.pb-nav-container {
+  max-width: 1400px;
+  min-height: 78px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.pb-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-decoration: none;
+  color: #0c1c30;
+  font-size: 27px;
+  font-weight: 800;
+}
+
+.pb-brand:hover {
+  color: #087b32;
+}
+
+.pb-brand-icon {
+  width: 43px;
+  height: 43px;
+  display: grid;
+  place-items: center;
+  background: #087b32;
+  border-radius: 12px;
+  color: white;
+  font-size: 23px;
+}
+
+.pb-nav-links {
+  display: flex;
+  gap: 30px;
+}
+
+.pb-nav-links a {
+  color: #25344a;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.pb-nav-links a:hover {
+  color: #087b32;
+}
+
+.pb-nav-action {
+  color: #087b32;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+/* PAGE LAYOUT */
+
+.pb-page-container {
+  max-width: 1400px;
+  padding-top: 30px;
+  padding-bottom: 65px;
+}
+
+.pb-breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 22px;
+  font-size: 14px;
+  color: #64748b;
+}
+
+.pb-breadcrumb a,
+.pb-step a {
+  color: #475569;
+  text-decoration: none;
+}
+
+.pb-breadcrumb a:hover,
+.pb-step a:hover {
+  color: #087b32;
+}
+
+.pb-breadcrumb strong {
+  color: #14243a;
+}
+
+.pb-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.65fr) minmax(340px, 0.95fr);
+  gap: 30px;
+  align-items: start;
+}
+
+.pb-main,
+.pb-aside {
+  min-width: 0;
+}
+
+/* TURF PHOTO */
+
+.pb-cover {
+  width: 100%;
+  height: 385px;
+  overflow: hidden;
+  border-radius: 20px;
+  background: #e8f4eb;
+}
+
+.pb-cover img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* VENUE INFORMATION */
+
+.pb-venue-name {
+  margin: 20px 0 10px;
+  font-size: clamp(28px, 3vw, 39px);
+  font-weight: 800;
+  letter-spacing: -0.7px;
+}
+
+.pb-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 18px;
+  font-size: 14px;
+  color: #4c6176;
+}
+
+.pb-meta i {
+  color: #087b32;
+  margin-right: 4px;
+}
+
+.pb-meta a {
+  color: #087b32;
+  text-decoration: none;
+}
+
+.pb-description {
+  color: #64748b;
+  line-height: 1.7;
+  margin: 14px 0 18px;
+}
+
+.pb-sports {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 9px;
+  margin: 16px 0 25px;
+}
+
+.pb-sport {
+  padding: 8px 15px;
+  border-radius: 30px;
+  background: #edf3ef;
+  color: #164b2a;
+  font-size: 13px;
+  font-weight: 650;
+}
+
+/* TABS */
+
+.pb-tabs {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin: 24px 0 15px;
+}
+
+.pb-tabs button {
+  padding: 11px 19px;
+  border: 1px solid #dfe6ec;
+  background: white;
+  color: #26364c;
+  border-radius: 11px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.pb-tabs button:hover {
+  border-color: #087b32;
+}
+
+.pb-tabs button.active {
+  background: #087b32;
+  border-color: #087b32;
+  color: white;
+}
+
+.pb-tab-content[hidden] {
+  display: none !important;
+}
+
+/* SHARED CARDS */
+
+.turfio-public-booking .tif-card {
+  background: #ffffff;
+  border: 1px solid #e0e7ee;
+  border-radius: 18px;
+  box-shadow: 0 8px 28px rgba(18, 37, 58, 0.045);
+}
+
+.pb-aside .tif-card {
+  padding: 24px !important;
+  margin-bottom: 20px !important;
+}
+
+.pb-aside h5,
+.pb-tab-content h5 {
+  font-weight: 750;
+}
+
+.pb-aside h5 {
+  font-size: 21px;
+}
+
+.pb-aside .form-label {
+  font-weight: 650;
+  color: #26364c;
+}
+
+.pb-aside .form-control,
+.pb-aside .form-select,
+.pb-narrow .form-control,
+.pb-narrow .form-select {
+  min-height: 46px;
+  border: 1px solid #d7e0e8;
+  border-radius: 10px;
+}
+
+.pb-aside .form-control:focus,
+.pb-aside .form-select:focus,
+.pb-narrow .form-control:focus,
+.pb-narrow .form-select:focus {
+  border-color: #087b32;
+  box-shadow: 0 0 0 3px rgba(8, 123, 50, 0.1);
+}
+
+.pb-primary-action {
+  min-height: 50px;
+  border-radius: 11px;
+  font-weight: 750;
+  background: #087b32;
+  border-color: #087b32;
+}
+
+.pb-primary-action:hover {
+  background: #056328;
+  border-color: #056328;
+}
+
+/* PRICING AND GROUNDS */
+
+.pb-tab-content .tif-card {
+  padding: 23px !important;
+}
+
+.pb-tab-content .table {
+  font-size: 14px;
+}
+
+.pb-tab-content .table th {
+  color: #24364b;
+  font-weight: 700;
+  background: #f5f8f6;
+}
+
+.pb-tab-content .table td {
+  padding-top: 12px;
+  padding-bottom: 12px;
+}
+
+.pb-ground-item {
+  padding: 14px 0;
+  border-bottom: 1px solid #edf0f3;
+}
+
+.pb-ground-item:last-child {
+  border-bottom: none;
+}
+
+/* CONFIRM BOOKING PAGE */
+
+.pb-narrow {
+  max-width: 760px;
+  margin: 8px auto 35px;
+}
+
+.pb-step {
+  margin-bottom: 20px;
+  font-size: 14px;
+}
+
+.pb-page-heading {
+  font-size: clamp(26px, 3vw, 34px);
+  font-weight: 800;
+}
+
+.pb-ground-choices {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.pb-ground-choice {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  padding: 14px;
+  border: 1px solid #dfe6ec;
+  border-radius: 12px;
+  cursor: pointer;
+}
+
+.pb-ground-choice:hover {
+  background: #f5fbf6;
+  border-color: #087b32;
+}
+
+.pb-ground-choice input {
+  accent-color: #087b32;
+  width: 17px;
+  height: 17px;
+}
+
+.pb-ground-choice span {
+  display: flex;
+  flex-direction: column;
+}
+
+.pb-ground-choice strong {
+  font-size: 14px;
+}
+
+.pb-ground-choice small {
+  color: #64748b;
+  font-size: 12px;
+}
+
+.pb-booking-notice {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 14px;
+  border-radius: 12px;
+  background: #f0f9f2;
+  color: #235735;
+  font-size: 13px;
+  text-align: left;
+}
+
+.pb-booking-notice i {
+  flex-shrink: 0;
+  font-size: 17px;
+}
+
+/* Preserve the existing spam-protection field
+   while keeping it out of the visible form. */
+
+.pb-honeypot {
+  position: absolute;
+  left: -10000px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+/* BOOKING SUCCESS PAGE */
+
+.pb-success {
+  text-align: center;
+}
+
+.pb-success-icon {
+  width: 75px;
+  height: 75px;
+  margin: 0 auto;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: #e1f7e8;
+  color: #087b32;
+  font-size: 42px;
+}
+
+.pb-reference {
+  margin: 25px 0;
+  padding: 20px;
+  background: #f2f9f4;
+  border: 1px solid #d9efdf;
+  border-radius: 14px;
+}
+
+.pb-reference h3 {
+  overflow-wrap: anywhere;
+}
+
+.pb-confirm-details {
+  text-align: left;
+  margin-top: 25px;
+}
+
+.pb-detail-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 13px 0;
+  border-bottom: 1px solid #edf0f3;
+  font-size: 14px;
+}
+
+.pb-detail-row span {
+  color: #64748b;
+}
+
+.pb-detail-row strong {
+  text-align: right;
+  color: #182b40;
+}
+
+.pb-confirm-amount {
+  padding: 22px;
+  margin-top: 25px;
+  background: #f7faf8;
+  border-radius: 14px;
+}
+
+.pb-confirm-amount h2 {
+  color: #087b32;
+}
+
+/* FOOTER */
+
+.pb-site-footer {
+  background: white;
+  border-top: 1px solid #e7ebef;
+  padding: 22px 0;
+}
+
+.pb-footer-content {
+  max-width: 1400px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 15px;
+  color: #64748b;
+  font-size: 13px;
+}
+
+.pb-footer-content p {
+  margin: 0;
+}
+
+/* RESPONSIVE */
+
+@media (max-width: 1000px) {
+
+  .pb-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .pb-cover {
+    height: 320px;
+  }
+
+  .pb-nav-links {
+    gap: 15px;
+  }
+
+}
+
+@media (max-width: 650px) {
+
+  .pb-nav-container {
+    min-height: 68px;
+  }
+
+  .pb-brand {
+    font-size: 22px;
+  }
+
+  .pb-brand-icon {
+    width: 37px;
+    height: 37px;
+    font-size: 19px;
+  }
+
+  .pb-nav-links {
+    display: none;
+  }
+
+  .pb-nav-action {
+    font-size: 12px;
+  }
+
+  .pb-page-container {
+    padding: 20px 15px 45px;
+  }
+
+  .pb-cover {
+    height: 225px;
+    border-radius: 14px;
+  }
+
+  .pb-venue-name {
+    font-size: 28px;
+  }
+
+  .pb-aside .tif-card {
+    padding: 17px !important;
+  }
+
+  .pb-tabs {
+    gap: 6px;
+  }
+
+  .pb-tabs button {
+    flex: 1;
+    padding: 10px 7px;
+    font-size: 12px;
+  }
+
+  .pb-narrow .tif-card {
+    padding: 20px !important;
+  }
+
+  .pb-detail-row {
+    font-size: 13px;
+  }
+
+  .pb-footer-content {
+    flex-direction: column;
+    text-align: center;
+  }
+
+}

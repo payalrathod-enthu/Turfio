@@ -1,272 +1,511 @@
 
 {% extends "public/base_public.html" %}
-{% load inr_filters %}
+{% load static inr_filters %}
+
+{% block title %}{{ biz.name }}{% endblock %}
 
 {% block content %}
 
-{% if biz.cover_image %}
-<div class="pub-hero mb-3">
-    <img src="{{ biz.cover_image.url }}"
-         alt="{{ biz.name }}"
-         class="w-100"
-         style="max-height:320px;object-fit:cover;border-radius:12px;">
+<div class="pb-breadcrumb">
+  <a href="{% url 'marketplace' %}">
+    <i class="bi bi-arrow-left"></i> Explore Turfs
+  </a>
+  <span>/</span>
+  <strong>{{ biz.name }}</strong>
 </div>
-{% endif %}
 
-<h3 class="mb-1">{{ biz.name }}</h3>
+<div class="pb-layout">
 
-<p class="text-muted small mb-2">
-    {% if biz.address %}
-        <i class="bi bi-geo-alt"></i>
-        {{ biz.address }}
-        {% if biz.city %}, {{ biz.city }}{% endif %}
-    {% endif %}
+  <!-- LEFT: TURF DETAILS -->
+  <div class="pb-main">
 
-    {% if biz.contact_phone %}
-        · <i class="bi bi-telephone"></i>
-        <a href="tel:{{ biz.contact_phone }}">
-            {{ biz.contact_phone }}
-        </a>
-    {% endif %}
-</p>
+    <!-- COVER PHOTO -->
+    <div class="pb-cover">
+      {% if biz.cover_image %}
+        <img
+          src="{{ biz.cover_image.url }}"
+          alt="{{ biz.name }}"
+        >
+      {% else %}
+        <img
+          src="{% static 'images/landing-player.png' %}"
+          alt="Sports turf"
+        >
+      {% endif %}
+    </div>
 
-{% if biz.description %}
-<p class="small">{{ biz.description|linebreaksbr }}</p>
-{% endif %}
+    <!-- VENUE INFORMATION -->
+    <h1 class="pb-venue-name">{{ biz.name }}</h1>
 
-{% if sports %}
-<div class="mb-3">
-    {% for sport in sports %}
-        <span class="badge badge-status-muted me-1">
-            {{ sport.name }}
+    <div class="pb-meta">
+
+      {% if biz.address or biz.city %}
+        <span>
+          <i class="bi bi-geo-alt-fill"></i>
+          {{ biz.address }}
+          {% if biz.address and biz.city %}, {% endif %}
+          {{ biz.city }}
         </span>
-    {% endfor %}
-</div>
-{% endif %}
+      {% endif %}
 
-<details class="mb-3 small">
-    <summary>Opening hours</summary>
+      {% if biz.contact_phone %}
+        <a href="tel:{{ biz.contact_phone }}">
+          <i class="bi bi-telephone-fill"></i>
+          {{ biz.contact_phone }}
+        </a>
+      {% endif %}
 
-    <table class="table table-sm mb-0 mt-2">
-        {% for d in week_rows %}
-        <tr>
-            <td>{{ d.day }}</td>
-            <td>
-                {% if d.open %}
-                    {{ d.start|time:"g:i A" }}
-                    –
-                    {{ d.end|time:"g:i A" }}
+    </div>
 
-                    {% if d.next_day %}
-                        (next day)
-                    {% endif %}
-                {% else %}
-                    Closed
-                {% endif %}
-            </td>
-        </tr>
-        {% empty %}
-        <tr>
-            <td colspan="2">
-                Opening hours unavailable.
-            </td>
-        </tr>
+    {% if biz.description %}
+      <p class="pb-description">
+        {{ biz.description|linebreaksbr }}
+      </p>
+    {% endif %}
+
+    <!-- SPORTS -->
+    {% if sports %}
+      <div class="pb-sports">
+        {% for sport in sports %}
+          <span class="pb-sport">
+            <i class="bi bi-trophy"></i>
+            {{ sport.name }}
+          </span>
         {% endfor %}
-    </table>
-</details>
+      </div>
+    {% endif %}
 
-<div class="tif-card p-3 mb-3">
+    <!-- INFORMATION TABS -->
+    <div class="pb-tabs" role="tablist"
+         aria-label="Turf information">
 
-    <h5 class="mb-3">Check Availability</h5>
+      <button
+        type="button"
+        class="active"
+        data-pb-tab="pricing"
+        role="tab"
+        aria-selected="true"
+      >
+        Pricing
+      </button>
 
-    <form method="get">
+      <button
+        type="button"
+        data-pb-tab="grounds"
+        role="tab"
+        aria-selected="false"
+      >
+        Available Grounds
+      </button>
 
-        {% if form.non_field_errors %}
-        <div class="alert alert-danger">
-            {{ form.non_field_errors }}
-        </div>
+      <button
+        type="button"
+        data-pb-tab="hours"
+        role="tab"
+        aria-selected="false"
+      >
+        Opening Hours
+      </button>
+
+    </div>
+
+    <!-- PRICING TAB -->
+    <div class="pb-tab-content" id="pb-panel-pricing">
+
+      <div class="tif-card p-3 mb-3">
+
+        <h5 class="mb-3">Pricing</h5>
+
+        {% if prices %}
+
+          <div class="table-responsive">
+            <table class="table table-sm align-middle">
+
+              <thead>
+                <tr>
+                  <th>Ground</th>
+                  <th>Weekday</th>
+                  <th>Weekend</th>
+                </tr>
+              </thead>
+
+              <tbody>
+                {% for p in prices %}
+                  <tr>
+
+                    <td>{{ p.type.name }}</td>
+
+                    <td>
+                      {% if p.weekday_base != None %}
+                        ₹{{ p.weekday_base|floatformat:0 }}/hr
+                      {% else %}
+                        —
+                      {% endif %}
+                    </td>
+
+                    <td>
+                      {% if p.weekend_base != None %}
+                        ₹{{ p.weekend_base|floatformat:0 }}/hr
+                      {% else %}
+                        —
+                      {% endif %}
+                    </td>
+
+                  </tr>
+                {% endfor %}
+              </tbody>
+
+            </table>
+          </div>
+
+          <p class="text-muted small mb-0">
+            Prices may vary depending on timing and
+            lighting requirements. Final pricing is
+            calculated during booking.
+          </p>
+
+        {% else %}
+
+          <p class="text-muted mb-0">
+            Pricing information is not available yet.
+          </p>
+
         {% endif %}
 
-        <div class="row g-3">
-            {% for field in form.visible_fields %}
-            <div class="col-12 col-md-6">
-                <label class="form-label small"
-                       for="{{ field.id_for_label }}">
-                    {{ field.label }}
-                </label>
+      </div>
 
-                {{ field }}
+    </div>
 
-                {% for error in field.errors %}
-                <div class="text-danger small">
-                    {{ error }}
-                </div>
-                {% endfor %}
+    <!-- GROUNDS TAB -->
+    <div
+      class="pb-tab-content"
+      id="pb-panel-grounds"
+      hidden
+    >
+
+      <div class="tif-card p-3 mb-3">
+
+        <h5 class="mb-3">Available Grounds</h5>
+
+        {% for offering in offerings %}
+
+          <div class="pb-ground-item">
+
+            <strong>{{ offering.type.name }}</strong>
+
+            <div class="text-muted small mt-1">
+              {% for option in offering.options %}
+                {{ option }}{% if not forloop.last %}, {% endif %}
+              {% empty %}
+                Ground details unavailable
+              {% endfor %}
             </div>
-            {% endfor %}
+
+          </div>
+
+        {% empty %}
+
+          <p class="text-muted mb-0">
+            No ground information is available.
+          </p>
+
+        {% endfor %}
+
+      </div>
+
+    </div>
+
+    <!-- OPENING HOURS TAB -->
+    <div
+      class="pb-tab-content"
+      id="pb-panel-hours"
+      hidden
+    >
+
+      <div class="tif-card p-3 mb-3">
+
+        <h5 class="mb-3">Opening Hours</h5>
+
+        <div class="table-responsive">
+
+          <table class="table table-sm align-middle mb-0">
+
+            <tbody>
+
+              {% for d in week_rows %}
+
+                <tr>
+
+                  <td class="fw-semibold">
+                    {{ d.day }}
+                  </td>
+
+                  <td>
+                    {% if d.open %}
+
+                      {{ d.start|time:"g:i A" }}
+                      –
+                      {{ d.end|time:"g:i A" }}
+
+                      {% if d.next_day %}
+                        <span class="text-muted small">
+                          (next day)
+                        </span>
+                      {% endif %}
+
+                    {% else %}
+                      Closed
+                    {% endif %}
+                  </td>
+
+                </tr>
+
+              {% empty %}
+
+                <tr>
+                  <td colspan="2">
+                    Opening hours unavailable.
+                  </td>
+                </tr>
+
+              {% endfor %}
+
+            </tbody>
+
+          </table>
+
         </div>
 
-        <button type="submit"
-                class="btn btn-primary w-100 mt-3">
-            Check Available Slots
-        </button>
+      </div>
 
-    </form>
-</div>
+    </div>
 
-{% if searched %}
+  </div>
 
-    {% if outcome and outcome.available %}
+  <!-- RIGHT: AVAILABILITY BOOKING PANEL -->
+  <aside class="pb-aside">
 
     <div class="tif-card p-3 mb-3">
 
-        <h5 class="text-success">
-            <i class="bi bi-check-circle"></i>
-            Slot Available!
-        </h5>
+      <h5 class="mb-3">
+        <i class="bi bi-calendar-check text-success"></i>
+        Check Availability
+      </h5>
 
-        <p class="mb-1">
+      <p class="text-muted small">
+        Choose your sport, ground type, date, and
+        preferred time to find an available slot.
+      </p>
+
+      <form method="get">
+
+        {% if form.non_field_errors %}
+          <div class="alert alert-danger">
+            {{ form.non_field_errors }}
+          </div>
+        {% endif %}
+
+        {% for field in form.hidden_fields %}
+          {{ field }}
+        {% endfor %}
+
+        <div class="row g-3">
+
+          {% for field in form.visible_fields %}
+
+            <div class="col-12 col-md-6">
+
+              <label
+                class="form-label small"
+                for="{{ field.id_for_label }}"
+              >
+                {{ field.label }}
+              </label>
+
+              {{ field }}
+
+              {% if field.help_text %}
+                <div class="form-text">
+                  {{ field.help_text }}
+                </div>
+              {% endif %}
+
+              {% for error in field.errors %}
+                <div class="text-danger small mt-1">
+                  {{ error }}
+                </div>
+              {% endfor %}
+
+            </div>
+
+          {% endfor %}
+
+        </div>
+
+        <button
+          type="submit"
+          class="btn btn-success w-100 mt-3 pb-primary-action"
+        >
+          <i class="bi bi-search"></i>
+          Check Available Slots
+        </button>
+
+      </form>
+
+    </div>
+
+    <!-- AVAILABILITY RESULT -->
+    {% if searched %}
+
+      {% if outcome and outcome.available %}
+
+        <div class="tif-card p-3 mb-3">
+
+          <h5 class="text-success">
+            <i class="bi bi-check-circle-fill"></i>
+            Slot Available!
+          </h5>
+
+          <p class="mb-2">
             <strong>Date:</strong>
             {{ outcome.date|date:"d M Y" }}
-        </p>
+          </p>
 
-        <p class="mb-1">
+          <p class="mb-2">
             <strong>Time:</strong>
             {{ outcome.start|time:"g:i A" }}
             –
             {{ outcome.end|time:"g:i A" }}
-        </p>
+          </p>
 
-        <p class="mb-1">
+          <p class="mb-2">
             <strong>Duration:</strong>
             {{ outcome.duration_label }}
-        </p>
+          </p>
 
-        <p class="mb-2">
+          <p class="mb-2">
             <strong>Ground:</strong>
             {{ outcome.config.name }}
-        </p>
+          </p>
 
-        <form method="get"
-              action="{% url 'public_book' slug=biz.slug %}">
+          <form
+            method="get"
+            action="{% url 'public_book' slug=biz.slug %}"
+          >
 
             {% for field in form.hidden_fields %}
-                {{ field }}
+              {{ field }}
             {% endfor %}
 
             {% for field in form.visible_fields %}
-                <input type="hidden"
-                       name="{{ field.html_name }}"
-                       value="{{ field.value|default_if_none:'' }}">
+
+              <input
+                type="hidden"
+                name="{{ field.html_name }}"
+                value="{{ field.value|default_if_none:'' }}"
+              >
+
             {% endfor %}
 
-            <button type="submit"
-                    class="btn btn-success w-100 mt-3">
-                Continue to Booking
+            <button
+              type="submit"
+              class="btn btn-success w-100 mt-3 pb-primary-action"
+            >
+              Continue to Booking
+              <i class="bi bi-arrow-right"></i>
             </button>
 
-        </form>
+          </form>
 
-    </div>
+        </div>
 
-    {% elif outcome and outcome.error %}
+      {% elif outcome and outcome.error %}
 
-    <div class="alert alert-warning">
-        {{ outcome.error }}
-    </div>
+        <div class="alert alert-warning">
+          {{ outcome.error }}
+        </div>
 
-    {% elif not form.errors %}
+      {% elif not form.errors %}
 
-    <div class="alert alert-warning">
-        Sorry, no available ground was found
-        for the selected time.
-        Please try another slot.
-    </div>
+        <div class="alert alert-warning">
+          Sorry, no available ground was found for
+          the selected time. Please try another slot.
+        </div>
+
+      {% endif %}
 
     {% endif %}
 
-{% endif %}
+    <!-- CONTACT TURF -->
+    {% if biz.contact_phone %}
 
-{% if prices %}
-<div class="tif-card p-3 mb-3">
+      <div class="tif-card p-3 mb-3">
 
-    <h5 class="mb-3">Pricing</h5>
+        <h6 class="fw-bold">Need Help?</h6>
 
-    <div class="table-responsive">
-        <table class="table table-sm">
-            <thead>
-                <tr>
-                    <th>Ground</th>
-                    <th>Weekday</th>
-                    <th>Weekend</th>
-                </tr>
-            </thead>
+        <p class="text-muted small">
+          Contact the turf directly for assistance.
+        </p>
 
-            <tbody>
-                {% for p in prices %}
-                <tr>
-                    <td>{{ p.type.name }}</td>
-                    <td>
-                        {% if p.weekday_base != None %}
-                            ₹{{ p.weekday_base|floatformat:0 }}/hr
-                        {% else %}
-                            —
-                        {% endif %}
-                    </td>
-                    <td>
-                        {% if p.weekend_base != None %}
-                            ₹{{ p.weekend_base|floatformat:0 }}/hr
-                        {% else %}
-                            —
-                        {% endif %}
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
+        <a
+          href="tel:{{ biz.contact_phone }}"
+          class="btn btn-outline-success w-100"
+        >
+          <i class="bi bi-telephone"></i>
+          Contact Turf
+        </a>
 
-    <p class="text-muted small mb-0">
-        Prices may vary depending on timing
-        and lighting requirements.
-        Final pricing is calculated during booking.
-    </p>
+      </div>
+
+    {% endif %}
+
+  </aside>
 
 </div>
-{% endif %}
 
-{% if offerings %}
-<div class="tif-card p-3 mb-3">
+<!-- TAB INTERACTIONS -->
+<script>
+document.addEventListener("DOMContentLoaded", function () {
 
-    <h5>Available Grounds</h5>
+  const buttons = document.querySelectorAll(
+    "[data-pb-tab]"
+  );
 
-    {% for offering in offerings %}
-    <div class="mb-2">
-        <strong>{{ offering.type.name }}</strong>
+  const panels = document.querySelectorAll(
+    ".pb-tab-content"
+  );
 
-        <div class="text-muted small">
-            {% for option in offering.options %}
-                {{ option }}{% if not forloop.last %}, {% endif %}
-            {% endfor %}
-        </div>
-    </div>
-    {% endfor %}
+  buttons.forEach(function (button) {
 
-</div>
-{% endif %}
+    button.addEventListener("click", function () {
 
-{% if biz.contact_phone %}
-<div class="tif-card p-3 mb-3">
+      const selected = button.dataset.pbTab;
 
-    <h6>Need Help?</h6>
+      buttons.forEach(function (item) {
 
-    <a href="tel:{{ biz.contact_phone }}"
-       class="btn btn-outline-primary w-100">
-        <i class="bi bi-telephone"></i>
-        Contact Turf
-    </a>
+        const active = item === button;
 
-</div>
-{% endif %}
+        item.classList.toggle("active", active);
+
+        item.setAttribute(
+          "aria-selected",
+          active ? "true" : "false"
+        );
+
+      });
+
+      panels.forEach(function (panel) {
+
+        panel.hidden = panel.id !==
+          "pb-panel-" + selected;
+
+      });
+
+    });
+
+  });
+
+});
+</script>
 
 {% endblock %}
