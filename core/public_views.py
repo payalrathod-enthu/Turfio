@@ -39,39 +39,92 @@ def owners_info(request):
 
 
 def marketplace(request):
-    q = request.GET.get('q', '').strip()[:80]
-    city = request.GET.get('city', '').strip()[:80]
-    sport = request.GET.get('sport', '').strip()[:80]
+    """Public turf discovery, with city and sport filters."""
+    q = request.GET.get("q", "").strip()[:80]
+    city = request.GET.get("city", "").strip()[:80]
+    sport = request.GET.get("sport", "").strip()[:80]
+    selected_date = request.GET.get("date", "").strip()[:10]
 
-    listed = TurfBusiness.objects.filter(status='active', is_listed=True)
+    # Only show businesses that are active and publicly listed.
+    listed = TurfBusiness.objects.filter(status="active", is_listed=True)
     qs = listed
+
     if q:
-        qs = qs.filter(Q(name__icontains=q) | Q(city__icontains=q) | Q(address__icontains=q))
+        qs = qs.filter(
+            Q(name__icontains=q)
+            | Q(city__icontains=q)
+            | Q(address__icontains=q)
+        )
     if city:
         qs = qs.filter(city__iexact=city)
     if sport:
-        qs = qs.filter(sports__is_active=True, sports__name__iexact=sport).distinct()
-    turfs = list(qs.order_by('name')[:60])
+        qs = qs.filter(
+            sports__is_active=True,
+            sports__name__iexact=sport,
+        ).distinct()
+
+    turfs = list(qs.order_by("name")[:60])
     ids = [t.id for t in turfs]
 
+    # Read sports and minimum online-bookable prices across tenants.
     sports_by = {}
-    for tenant_id, name in (Sport._base_manager.filter(tenant_id__in=ids, is_active=True)
-                            .order_by('name').values_list('tenant_id', 'name')):
+    for tenant_id, name in (
+        Sport._base_manager.filter(tenant_id__in=ids, is_active=True)
+        .order_by("name")
+        .values_list("tenant_id", "name")
+    ):
         sports_by.setdefault(tenant_id, []).append(name)
+
     prices = dict(
         PricingRule._base_manager.filter(
-            tenant_id__in=ids, is_active=True, bookable_type__is_active=True,
-            bookable_type__configs__is_active=True, bookable_type__configs__online_bookable=True)
-        .values('tenant_id').annotate(m=Min('price_per_hour')).values_list('tenant_id', 'm'))
+            tenant_id__in=ids,
+            is_active=True,
+            bookable_type__is_active=True,
+            bookable_type__configs__is_active=True,
+            bookable_type__configs__online_bookable=True,
+        )
+        .values("tenant_id")
+        .annotate(m=Min("price_per_hour"))
+        .values_list("tenant_id", "m")
+    )
 
-    cities = sorted(set(listed.exclude(city='').values_list('city', flat=True)))
-    sport_names = sorted({n.title() for n in (
-        Sport._base_manager.filter(tenant__in=listed, is_active=True)
-        .annotate(l=Lower('name')).values_list('l', flat=True))})
-    return render(request, "public/marketplace.html", {
-        "turfs": [{"turf": t, "sports": sports_by.get(t.id, []), "from_price": prices.get(t.id)} for t in turfs],
-        "q": q, "city": city, "sport": sport, "cities": cities, "sport_names": sport_names,
-        "filtered": bool(q or city or sport)})
+    # The new marketplace template loops directly over TurfBusiness objects.
+    # Attach presentation-only attributes; nothing is saved to the database.
+    for turf in turfs:
+        turf.display_sports = sports_by.get(turf.id, [])
+        turf.display_price = prices.get(turf.id)
+
+    cities = sorted(
+        set(listed.exclude(city="").values_list("city", flat=True)),
+        key=str.casefold,
+    )
+    sport_names = sorted(
+        {
+            name.title()
+            for name in (
+                Sport._base_manager.filter(tenant__in=listed, is_active=True)
+                .annotate(normalized=Lower("name"))
+                .values_list("normalized", flat=True)
+            )
+        },
+        key=str.casefold,
+    )
+
+    return render(
+        request,
+        "public/marketplace_new.html",
+        {
+            "turfs": turfs,
+            "q": q,
+            "city": city,
+            "sport": sport,
+            "date": selected_date,
+            "cities": cities,
+            "sports": sport_names,
+            "sport_names": sport_names,
+            "filtered": bool(q or city or sport),
+        },
+    )
 
 
 # ---------------------------------------------------------------------------
