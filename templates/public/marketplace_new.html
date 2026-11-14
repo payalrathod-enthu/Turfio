@@ -1,0 +1,359 @@
+
+{% extends "public/site_base.html" %}
+{% load static %}
+
+{% block title %}Find a Turf{% endblock %}
+
+{% block content %}
+
+<link rel="stylesheet"
+      href="{% static 'css/marketplace.css' %}">
+
+<div class="marketplace-page">
+
+  <!-- HERO -->
+  <section class="mp-hero">
+    <div class="mp-container">
+
+      <h1>Find your perfect <span>turf.</span></h1>
+
+      <p>
+        Discover sports venues, compare prices,
+        and book your next game.
+      </p>
+
+      <!-- SEARCH PANEL -->
+      <div class="mp-search-panel">
+
+        <div class="mp-tabs">
+          <a href="#turf-results" class="mp-tab active">
+            <i class="bi bi-calendar-check"></i>
+            Book a Turf
+          </a>
+
+          <a href="#turf-results" class="mp-tab">
+            <i class="bi bi-geo-alt"></i>
+            Explore Turfs
+          </a>
+        </div>
+
+        <form method="get" action="{% url 'marketplace' %}">
+
+          <div class="mp-filter-grid">
+
+            <!-- SEARCH -->
+            <div class="mp-field">
+              <label for="mp-query">
+                <i class="bi bi-search"></i>
+                Search
+              </label>
+
+              <input
+                id="mp-query"
+                type="search"
+                name="q"
+                value="{{ request.GET.q|default:'' }}"
+                placeholder="Turf name, area or locality..."
+              >
+            </div>
+
+            <!-- CITY -->
+            <div class="mp-field">
+              <label for="mp-city">
+                <i class="bi bi-geo-alt"></i>
+                City
+              </label>
+
+              <select id="mp-city" name="city">
+                <option value="">All Cities</option>
+
+                {% for city in cities %}
+                  <option
+                    value="{{ city }}"
+                    {% if request.GET.city == city %}selected{% endif %}
+                  >
+                    {{ city }}
+                  </option>
+                {% endfor %}
+
+              </select>
+            </div>
+
+            <!-- SPORT -->
+            <div class="mp-field">
+              <label for="mp-sport">
+                <i class="bi bi-trophy"></i>
+                Sport
+              </label>
+
+              <select id="mp-sport" name="sport">
+                <option value="">All Sports</option>
+
+                {% for sport in sports %}
+                  <option
+                    value="{{ sport }}"
+                    {% if request.GET.sport == sport %}selected{% endif %}
+                  >
+                    {{ sport }}
+                  </option>
+                {% endfor %}
+
+              </select>
+            </div>
+
+            <!-- DATE -->
+            <div class="mp-field">
+              <label for="mp-date">
+                <i class="bi bi-calendar3"></i>
+                Date (Optional)
+              </label>
+
+              <input
+                id="mp-date"
+                type="date"
+                name="date"
+                value="{{ request.GET.date|default:'' }}"
+              >
+            </div>
+
+            <!-- SEARCH BUTTON -->
+            <button type="submit" class="mp-search-button">
+              <i class="bi bi-search"></i>
+              Search
+            </button>
+
+          </div>
+
+        </form>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- FEATURES -->
+  <section class="mp-features">
+    <div class="mp-container mp-feature-grid">
+
+      <div class="mp-feature">
+        <span class="mp-feature-icon">
+          <i class="bi bi-calendar-check"></i>
+        </span>
+        <div>
+          <strong>Instant Booking</strong>
+          <small>Check availability & book</small>
+        </div>
+      </div>
+
+      <div class="mp-feature">
+        <span class="mp-feature-icon">
+          <i class="bi bi-lightning-charge"></i>
+        </span>
+        <div>
+          <strong>Multiple Sports</strong>
+          <small>Find venues for your game</small>
+        </div>
+      </div>
+
+      <div class="mp-feature">
+        <span class="mp-feature-icon">
+          <i class="bi bi-geo-alt"></i>
+        </span>
+        <div>
+          <strong>Top Locations</strong>
+          <small>Explore turfs by city</small>
+        </div>
+      </div>
+
+      <div class="mp-feature">
+        <span class="mp-feature-icon">
+          <i class="bi bi-shield-check"></i>
+        </span>
+        <div>
+          <strong>Easy Booking</strong>
+          <small>Simple and convenient</small>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- RESULTS -->
+  <section class="mp-results" id="turf-results">
+    <div class="mp-container">
+
+      <div class="mp-results-heading">
+
+        <div>
+          <h2>Explore Turfs</h2>
+          <p>
+            {{ turfs|length }} turf{{ turfs|length|pluralize }} found
+          </p>
+        </div>
+
+        <div class="mp-sort">
+          <label for="mp-sort">Sort by:</label>
+
+          <select id="mp-sort">
+            <option value="default">Recommended</option>
+            <option value="name">Name A–Z</option>
+            <option value="city">City A–Z</option>
+          </select>
+
+          <button
+            type="button"
+            class="btn btn-outline-success"
+            id="mp-grid-btn"
+            aria-label="Grid view"
+          >
+            <i class="bi bi-grid"></i>
+          </button>
+
+          <button
+            type="button"
+            class="btn btn-outline-success"
+            id="mp-list-btn"
+            aria-label="List view"
+          >
+            <i class="bi bi-list-ul"></i>
+          </button>
+        </div>
+
+      </div>
+
+      <div class="mp-turf-grid" id="mp-turf-grid">
+
+        {% for turf in turfs %}
+
+          <article
+            class="mp-turf-card"
+            data-name="{{ turf.name|lower }}"
+            data-city="{{ turf.city|default:''|lower }}"
+          >
+
+            {% if turf.cover_image %}
+              <img
+                src="{{ turf.cover_image.url }}"
+                alt="{{ turf.name }}"
+                class="mp-turf-image"
+                loading="lazy"
+              >
+            {% else %}
+              <img
+                src="{% static 'images/landing-player.png' %}"
+                alt="Sports turf"
+                class="mp-turf-image"
+                loading="lazy"
+              >
+            {% endif %}
+
+            <div class="mp-turf-info">
+
+              <h3>{{ turf.name }}</h3>
+
+              <div class="mp-location">
+                <i class="bi bi-geo-alt-fill"></i>
+                {{ turf.area|default:'' }}
+                {% if turf.area and turf.city %},{% endif %}
+                {{ turf.city|default:'' }}
+              </div>
+
+              <div class="mp-sports">
+                {% for sport in turf.display_sports %}
+                  <span class="mp-sport">
+                    {{ sport }}
+                  </span>
+                {% endfor %}
+              </div>
+
+              <div class="mp-turf-bottom">
+
+                <div class="mp-price">
+                  {% if turf.display_price %}
+                    <strong>₹{{ turf.display_price }}/hr</strong>
+                    <small>Starting price</small>
+                  {% else %}
+                    <strong>View pricing</strong>
+                    <small>See available grounds</small>
+                  {% endif %}
+                </div>
+
+                <a
+                  href="{% url 'public_home' turf.slug %}"
+                  class="mp-book-button"
+                >
+                  View & Book
+                  <i class="bi bi-arrow-right"></i>
+                </a>
+
+              </div>
+
+            </div>
+
+          </article>
+
+        {% empty %}
+
+          <div class="mp-empty">
+            <i class="bi bi-search"></i>
+            <h3>No turfs found</h3>
+            <p>Try another city, sport, or search term.</p>
+
+            <a
+              href="{% url 'marketplace' %}"
+              class="mp-book-button"
+            >
+              Clear Filters
+            </a>
+          </div>
+
+        {% endfor %}
+
+      </div>
+
+    </div>
+  </section>
+
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+  const grid = document.getElementById("mp-turf-grid");
+  const gridButton = document.getElementById("mp-grid-btn");
+  const listButton = document.getElementById("mp-list-btn");
+  const sortSelect = document.getElementById("mp-sort");
+
+  gridButton.addEventListener("click", function () {
+    grid.classList.remove("list-view");
+  });
+
+  listButton.addEventListener("click", function () {
+    grid.classList.add("list-view");
+  });
+
+  const originalCards = Array.from(
+    grid.querySelectorAll(".mp-turf-card")
+  );
+
+  sortSelect.addEventListener("change", function () {
+    const cards = [...originalCards];
+
+    if (this.value === "name") {
+      cards.sort((a, b) =>
+        a.dataset.name.localeCompare(b.dataset.name)
+      );
+    }
+
+    if (this.value === "city") {
+      cards.sort((a, b) =>
+        a.dataset.city.localeCompare(b.dataset.city)
+      );
+    }
+
+    cards.forEach(card => grid.appendChild(card));
+  });
+
+});
+</script>
+
+{% endblock %}

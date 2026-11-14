@@ -1,0 +1,403 @@
+
+/* TURFIO PUBLIC MARKETPLACE */
+
+.marketplace-page {
+  --mp-green: #087b32;
+  --mp-dark: #071b2b;
+  --mp-muted: #617084;
+  color: var(--mp-dark);
+  background: #fff;
+}
+
+.marketplace-page * {
+  box-sizing: border-box;
+}
+
+.mp-container {
+  width: min(1440px, calc(100% - 64px));
+  margin: 0 auto;
+}
+
+
+.mp-hero {
+  position: relative;
+  padding: 46px 0 32px;
+
+  background:
+    linear-gradient(
+      90deg,
+      rgba(5, 42, 20, 0.94),
+      rgba(5, 42, 20, 0.60)
+    ),
+    url("/static/images/marketplace-hero.png")
+      center / cover no-repeat;
+
+  color: white;
+}
+
+
+.mp-hero h1 {
+  font-size: clamp(34px, 4vw, 58px);
+  font-weight: 800;
+  letter-spacing: -1.5px;
+  margin: 0 0 8px;
+}
+
+.mp-hero h1 span {
+  color: #a0f22b;
+}
+
+.mp-hero p {
+  font-size: 18px;
+  margin: 0;
+  opacity: .94;
+}
+
+.mp-search-panel {
+  position: relative;
+  margin-top: 30px;
+  padding: 22px 24px;
+  border-radius: 24px;
+  background: white;
+  color: var(--mp-dark);
+  box-shadow: 0 15px 35px rgba(0,0,0,.12);
+}
+
+.mp-tabs {
+  display: flex;
+  gap: 10px;
+  padding-bottom: 18px;
+  border-bottom: 1px solid #edf0f2;
+  margin-bottom: 20px;
+}
+
+.mp-tab {
+  padding: 12px 22px;
+  border-radius: 12px;
+  background: #f0f2f4;
+  color: var(--mp-dark);
+  text-decoration: none;
+  font-weight: 700;
+}
+
+.mp-tab.active {
+  background: var(--mp-green);
+  color: white;
+}
+
+.mp-filter-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1.15fr auto;
+  gap: 12px;
+  align-items: end;
+}
+
+.mp-field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-width: 0;
+}
+
+.mp-field label {
+  font-size: 12px;
+  font-weight: 700;
+  color: #42536a;
+}
+
+.mp-field input,
+.mp-field select,
+.mp-sort select {
+  width: 100%;
+  height: 48px;
+  border: 1px solid #d8e0e8;
+  border-radius: 11px;
+  padding: 0 12px;
+  color: var(--mp-dark);
+  background: white;
+  outline: none;
+}
+
+.mp-field input:focus,
+.mp-field select:focus {
+  border-color: var(--mp-green);
+  box-shadow: 0 0 0 3px rgba(8,123,50,.10);
+}
+
+.mp-search-button,
+.mp-book-button {
+  background: var(--mp-green);
+  color: white;
+  border: 0;
+  border-radius: 11px;
+  padding: 13px 22px;
+  font-weight: 700;
+  text-decoration: none;
+  text-align: center;
+  cursor: pointer;
+}
+
+.mp-search-button:hover,
+.mp-book-button:hover {
+  background: #056329;
+  color: white;
+}
+
+.mp-features {
+  background: #f5fbf6;
+  padding: 26px 0;
+}
+
+.mp-feature-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 22px;
+}
+
+.mp-feature {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.mp-feature-icon {
+  display: grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: #dff7e5;
+  color: var(--mp-green);
+  font-size: 23px;
+}
+
+.mp-feature strong {
+  display: block;
+  font-size: 15px;
+}
+
+.mp-feature small {
+  color: var(--mp-muted);
+  font-size: 12px;
+}
+
+.mp-results {
+  padding: 40px 0 70px;
+}
+
+.mp-results-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+  margin-bottom: 24px;
+}
+
+.mp-results-heading h2 {
+  font-size: 30px;
+  font-weight: 800;
+  margin: 0 0 5px;
+}
+
+.mp-results-heading p {
+  margin: 0;
+  color: var(--mp-muted);
+}
+
+.mp-sort {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.mp-sort select {
+  width: 190px;
+}
+
+.mp-turf-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 22px;
+}
+
+.mp-turf-card {
+  display: flex;
+  gap: 22px;
+  border: 1px solid #e5eaf0;
+  border-radius: 22px;
+  padding: 16px;
+  box-shadow: 0 10px 28px rgba(0,0,0,.04);
+  background: white;
+  min-width: 0;
+}
+
+.mp-turf-image {
+  width: 42%;
+  min-height: 235px;
+  flex-shrink: 0;
+  border-radius: 15px;
+  object-fit: cover;
+  background: #e8f3eb;
+}
+
+.mp-turf-info {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+}
+
+.mp-turf-info h3 {
+  font-size: 23px;
+  font-weight: 800;
+  margin: 4px 0 8px;
+}
+
+.mp-location {
+  color: var(--mp-muted);
+  font-size: 14px;
+  margin-bottom: 14px;
+}
+
+.mp-location i {
+  color: var(--mp-green);
+}
+
+.mp-sports {
+  display: flex;
+  gap: 7px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+.mp-sport {
+  padding: 6px 12px;
+  border-radius: 25px;
+  background: #f1f4f6;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.mp-turf-bottom {
+  margin-top: auto;
+  padding-top: 15px;
+  border-top: 1px solid #edf0f2;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.mp-price strong {
+  font-size: 20px;
+}
+
+.mp-price small {
+  display: block;
+  color: var(--mp-muted);
+  font-size: 12px;
+}
+
+.mp-empty {
+  text-align: center;
+  padding: 70px 20px;
+  border: 1px dashed #d7e2da;
+  border-radius: 20px;
+}
+
+.mp-empty i {
+  font-size: 40px;
+  color: var(--mp-green);
+}
+
+.mp-empty h3 {
+  margin-top: 15px;
+}
+
+@media (min-width: 1200px) {
+  .mp-turf-grid.list-view {
+    grid-template-columns: 1fr;
+  }
+
+  .mp-turf-grid.list-view .mp-turf-image {
+    width: 34%;
+  }
+}
+
+@media (max-width: 1100px) {
+  .mp-filter-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .mp-search-button {
+    grid-column: 1 / -1;
+  }
+
+  .mp-feature-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .mp-turf-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 650px) {
+  .mp-container {
+    width: calc(100% - 30px);
+  }
+
+  .mp-hero {
+    padding-top: 35px;
+  }
+
+  .mp-hero p {
+    font-size: 15px;
+  }
+
+  .mp-search-panel {
+    padding: 16px;
+  }
+
+  .mp-filter-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .mp-tabs {
+    flex-wrap: wrap;
+  }
+
+  .mp-feature-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 18px 10px;
+  }
+
+  .mp-feature {
+    align-items: flex-start;
+  }
+
+  .mp-feature-icon {
+    width: 40px;
+    height: 40px;
+    font-size: 18px;
+  }
+
+  .mp-results-heading {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .mp-turf-card {
+    flex-direction: column;
+  }
+
+  .mp-turf-image {
+    width: 100%;
+    height: 220px;
+  }
+
+  .mp-turf-bottom {
+    flex-wrap: wrap;
+  }
+}
